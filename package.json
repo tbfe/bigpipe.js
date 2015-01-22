@@ -1,0 +1,15 @@
+{
+  "name": "bigpipe.js",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/serve & SERVER_PID=$!; phantomjs test/runner.js test/index.html; kill $SERVER_PID"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "jasmine": "^2.1.1",
+    "node-static": "^0.7.6"
+  }
+}
