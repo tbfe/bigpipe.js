@@ -15,6 +15,7 @@
 <body>
     <div id="style-manager-test1"></div>
     <div id="style-manager-test2"></div>
+    <div id="style-manager-test3"></div>
     <script>
     describe("Style Manager", function() {
         var styleManager = Bigpipe.styleManager;
@@ -22,31 +23,11 @@
             var target = document.getElementById('style-manager-test1');
             styleManager.load('styles/style-manager-test1/height.css').then(function(){
                 expect(getComputedStyle(target).height).toBe('10px');
-                styleManager.unload('styles/style-manager-test1/height.css').then(function(){
-                    expect(getComputedStyle(target).height).toBe('0px');
-                    done();
-                });
-            });
-        });
-
-        it("Cache control", function(done) {
-            var target = document.getElementById('style-manager-test1');
-            var originalStylesLength = document.styleSheets.length;
-            styleManager.load('styles/style-manager-test1/height.css').then(function(){
-                expect(document.styleSheets.length).toBe(originalStylesLength + 1);
-                styleManager.load('styles/style-manager-test1/height.css').then(function(){
-                    expect(getComputedStyle(target).height).toBe('10px');
-                    expect(document.styleSheets.length).toBe(originalStylesLength + 1);
-                    styleManager.unload('styles/style-manager-test1/height.css').then(function(){
-                        expect(getComputedStyle(target).height).toBe('10px');
-                        expect(document.styleSheets.length).toBe(originalStylesLength + 1);
-                        styleManager.unload('styles/style-manager-test1/height.css').then(function(){
-                            expect(getComputedStyle(target).height).toBe('0px');
-                            expect(document.styleSheets.length).toBe(originalStylesLength);
-                            done();
-                        });
-                    });
-                });
+            }).then(function() {
+                return styleManager.unload('styles/style-manager-test1/height.css');
+            }).then(function(){
+                expect(getComputedStyle(target).height).toBe('0px');
+                done();
             });
         });
 
@@ -61,6 +42,30 @@
                 expect(cssStyles.lineHeight).toBe('20px');
                 // lineHeight.css 应该覆盖 height.css 中相同权重的属性
                 expect(cssStyles.fontSize).toBe('13px');
+                done();
+            });
+        });
+
+        it("Cache control", function(done) {
+            var target = document.getElementById('style-manager-test3');
+            var originalStylesLength = document.styleSheets.length;
+            styleManager.load('styles/style-manager-test3/height.css').then(function(){
+                expect(document.styleSheets.length).toBe(originalStylesLength + 1);
+            }).then(function(){
+                return styleManager.load('styles/style-manager-test3/height.css');
+            }).then(function(){
+                expect(getComputedStyle(target).height).toBe('10px');
+                expect(document.styleSheets.length).toBe(originalStylesLength + 1);
+            }).then(function(){
+                return styleManager.unload('styles/style-manager-test3/height.css');
+            }).then(function(){
+                expect(getComputedStyle(target).height).toBe('10px');
+                expect(document.styleSheets.length).toBe(originalStylesLength + 1);
+            }).then(function(){
+                return styleManager.unload('styles/style-manager-test3/height.css');
+            }).then(function(){
+                expect(getComputedStyle(target).height).toBe('0px');
+                expect(document.styleSheets.length).toBe(originalStylesLength);
                 done();
             });
         });
