@@ -1,18 +1,108 @@
 <!doctype html>
 <head>
     <title>Bigpipe.js Test</title>
+    <link rel="stylesheet" href="../bower_components/jasmine/lib/jasmine-core/jasmine.css">
     <script src="../bower_components/jasmine/lib/jasmine-core/jasmine.js"></script>
     <script src="../bower_components/jasmine/lib/jasmine-core/jasmine-html.js"></script>
     <script src="../bower_components/jasmine/lib/jasmine-core/boot.js"></script>
     <script src="../lib/bigpipe.js"></script>
     <script>
-    describe("test suite", function() {
-        it("Pagelet should be an Object", function() {
-            expect(typeof window.Pagelet).toBe('object');
-        });
-    });
+    Bigpipe.debug(true);
+    window.Pagelet = Bigpipe.Pagelet;
+    window.pagelets = Bigpipe.pagelets;
     </script>
 </head>
 <body>
+    <div id="style-manager-test1"></div>
+    <div id="style-manager-test2"></div>
+    <script>
+    describe("Style Manager", function() {
+        var styleManager = Bigpipe.styleManager;
+        it("loading/unloading callback called after styles applied", function(done) {
+            var target = document.getElementById('style-manager-test1');
+            styleManager.load('styles/style-manager-test1/height.css').then(function(){
+                expect(getComputedStyle(target).height).toBe('10px');
+                styleManager.unload('styles/style-manager-test1/height.css').then(function(){
+                    expect(getComputedStyle(target).height).toBe('0px');
+                    done();
+                });
+            });
+        });
 
+        it("Cache control", function(done) {
+            var target = document.getElementById('style-manager-test1');
+            var originalStylesLength = document.styleSheets.length;
+            styleManager.load('styles/style-manager-test1/height.css').then(function(){
+                expect(document.styleSheets.length).toBe(originalStylesLength + 1);
+                styleManager.load('styles/style-manager-test1/height.css').then(function(){
+                    expect(getComputedStyle(target).height).toBe('10px');
+                    expect(document.styleSheets.length).toBe(originalStylesLength + 1);
+                    styleManager.unload('styles/style-manager-test1/height.css').then(function(){
+                        expect(getComputedStyle(target).height).toBe('10px');
+                        expect(document.styleSheets.length).toBe(originalStylesLength + 1);
+                        styleManager.unload('styles/style-manager-test1/height.css').then(function(){
+                            expect(getComputedStyle(target).height).toBe('0px');
+                            expect(document.styleSheets.length).toBe(originalStylesLength);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it("Multiple styles loading", function(done) {
+            var target = document.getElementById('style-manager-test2');
+            styleManager.load([
+                'styles/style-manager-test2/height.css',
+                'styles/style-manager-test2/lineHeight.css'
+            ]).then(function(){
+                var cssStyles = getComputedStyle(target);
+                expect(cssStyles.height).toBe('10px');
+                expect(cssStyles.lineHeight).toBe('20px');
+                // lineHeight.css 应该覆盖 height.css 中相同权重的属性
+                expect(cssStyles.fontSize).toBe('13px');
+                done();
+            });
+        });
+
+    });
+    </script>
+    <script>
+    describe('Script Loader', function() {
+        var scriptLoader = Bigpipe.scriptLoader;
+        it('load script', function(done) {
+            scriptLoader.load('scripts/script-loader-test/inc.js').then(function(){
+                expect(window.scriptTestCounter).toBe(1);
+                scriptLoader.load('scripts/script-loader-test/inc.js').then(function(){
+                    expect(window.scriptTestCounter).toBe(2);
+                    scriptLoader.load([
+                        'scripts/script-loader-test/inc.js',
+                        'scripts/script-loader-test/reset.js'
+                    ]).then(function(){
+                        expect(window.scriptTestCounter).toBe(0);
+                    });
+                });
+            });
+        });
+    });
+    </script>
+    <div id="pagelet_nav"></div>
+    <code class="pagelet_html"><!--<nav id="nav"></nav>--></code>
+    <script>
+    describe("Basic pagelet registering", function() {
+        it("Bigpipe.register", function(done) {
+            Bigpipe.register('nav', {
+                styles: ['nav/height.css'],
+                scripts: ['nav/height.js', 'nav/mod_b.js'],
+                initScript: "window.navC = window.navHeight + window.navB;"
+            }, function(pagelet) {
+                var container = document.getElementById('pagelet_nav');
+                expect(container.innerHTML).toBe("<nav id=\"nav\"></nav>");
+                expect(window.navHeight).toBe(2);
+                expect(window.navB).toBe(3);
+                expect(window.navC).toBe(5);
+            });
+        });
+    });
+    </script>
 </body>
