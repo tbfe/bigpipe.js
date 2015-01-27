@@ -2,15 +2,15 @@ module.exports = function(grunt) {
 	require('load-grunt-tasks')(grunt);
 
 	var browsers = [{
-		browserName: "firefox",
-		platform: "XP"
-	}, {
 		browserName: "chrome",
 		platform: "XP"
 	}, {
 		browserName: "chrome",
 		platform: "XP",
 		version: "30"
+	}, {
+		browserName: "chrome",
+		platform: "OS X 10.10"
 	}, {
 		browserName: "internet explorer",
 		platform: "XP",
@@ -21,12 +21,21 @@ module.exports = function(grunt) {
 		version: "9"
 	}, {
 		browserName: "internet explorer",
-		platform: "WIN8",
-		version: "11"
+		version: "10"
 	}, {
 		browserName: "internet explorer",
-		platform: "WIN8",
 		version: "11"
+	}, {
+		browserName: "firefox"
+	}, {
+		browserName: "safari",
+		platform: "OS X 10.10"
+	}, {
+		browserName: "iphone",
+		version: "8.1"
+	}, {
+		browserName: "android",
+		version: "4.4"
 	}];
 
 	grunt.initConfig({
@@ -47,7 +56,7 @@ module.exports = function(grunt) {
 					concurrency: 3,
 					browsers: browsers,
 					testname: "bigpipe.js tests",
-					tags: ["master"]
+					tags: ["ci", "master"]
 				}
 			}
 		},
