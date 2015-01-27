@@ -16,25 +16,26 @@ var system = require('system');
  */
 function waitFor(testFx, onReady, timeOutMillis) {
     var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 3001, //< Default Max Timeout is 3s
-        start = new Date().getTime(),
-        condition = false,
-        interval = setInterval(function() {
-            if ( (new Date().getTime() - start < maxtimeOutMillis) && !condition ) {
-                // If not time-out yet and condition not yet fulfilled
-                condition = (typeof(testFx) === "string" ? eval(testFx) : testFx()); //< defensive code
+    start = new Date().getTime(),
+    condition = false,
+    interval = setInterval(function() {
+        if ( (new Date().getTime() - start < maxtimeOutMillis) && !condition ) {
+            // If not time-out yet and condition not yet fulfilled
+            condition = (typeof(testFx) === "string" ? eval(testFx) : testFx()); //< defensive code
+            console.log(condition);
+        } else {
+            if(!condition) {
+                // If condition still not fulfilled (timeout but condition is 'false')
+                console.log("'waitFor()' timeout");
+                phantom.exit(1);
             } else {
-                if(!condition) {
-                    // If condition still not fulfilled (timeout but condition is 'false')
-                    console.log("'waitFor()' timeout");
-                    phantom.exit(1);
-                } else {
-                    // Condition fulfilled (timeout and/or condition is 'true')
-                    console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
-                    typeof(onReady) === "string" ? eval(onReady) : onReady(); //< Do what it's supposed to do once the condition is fulfilled
-                    clearInterval(interval); //< Stop this interval
-                }
+                // Condition fulfilled (timeout and/or condition is 'true')
+                console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
+                typeof(onReady) === "string" ? eval(onReady) : onReady(); //< Do what it's supposed to do once the condition is fulfilled
+                clearInterval(interval); //< Stop this interval
             }
-        }, 100); //< repeat check every 100ms
+        }
+    }, 100); //< repeat check every 100ms
 };
 
 
@@ -50,42 +51,103 @@ page.onConsoleMessage = function(msg) {
     console.log(msg);
 };
 
-page.open('http://127.0.0.1:' + WEBSERVER_PORT + '/' + system.args[1], function(status){
+page.open(system.args[1], function(status){
     if (status !== "success") {
         console.log("Unable to access network");
         phantom.exit();
     } else {
         waitFor(function(){
             return page.evaluate(function(){
-                return document.body.querySelector('.symbolSummary .pending') === null
+                // If no .symbolSummary or pending is present then, we are not finished loading
+                return document.body.querySelector('div.banner .duration') !== null;
             });
         }, function(){
             var exitCode = page.evaluate(function(){
                 console.log('');
 
-                var el = document.body.querySelector('.banner');
-                var banner = el.querySelector('.title').innerText + " " +
-                             el.querySelector('.version').innerText + " " +
-                             el.querySelector('.duration').innerText;
+                // Load jasmine version info
+                var banner = document.body.querySelector('div.banner > .title').innerText;
+                banner += "     " + document.body.querySelector('div.banner > span.version').innerText;
                 console.log(banner);
+                console.log("");
+                console.log("Test Summary");
 
-                var list = document.body.querySelectorAll('.results > .failures > .spec-detail.failed');
-                if (list && list.length > 0) {
-                  console.log('');
-                  console.log(list.length + ' test(s) FAILED:');
-                  for (i = 0; i < list.length; ++i) {
-                      var el = list[i],
-                          desc = el.querySelector('.description'),
-                          msg = el.querySelector('.messages > .result-message');
-                      console.log('');
-                      console.log(desc.innerText);
-                      console.log(msg.innerText);
-                      console.log('');
-                  }
-                  return 1;
-                } else {
-                  console.log(document.body.querySelector('.alert > .bar.passed').innerText);
-                  return 0;
+                // Load passing tests
+                var testSummary = document.body.querySelectorAll('ul.symbol-summary > li');
+                var testSummaryOut = "";
+
+                var alert = true;
+
+                for(var i = 0; i < testSummary.length; i ++)
+                {
+                    if(testSummary[i].classList.contains('passed'))
+                    {
+                        testSummaryOut += ".";
+                    }
+                    else
+                    {
+                        testSummaryOut += "x";
+                        alert = false;
+                    }
+                }
+                console.log(testSummaryOut);
+
+                // If alert is true, then we passed
+                if(alert)
+                {
+                    console.log("----------------------------------------------------------------------");
+
+                    // Get bar passed
+                    console.log("Describe: " + document.body.querySelector(".jasmine_html-reporter > div.alert > span.passed").innerText);
+                    console.log("----------------------------------------------------------------------");
+
+                    // Get results
+                    var specDetails = document.body.querySelectorAll('div.results > div.summary > ul');
+
+                    // Print each fail
+                    for(var i = 0; i < specDetails.length; i ++)
+                    {
+                        console.log('Test ' + i);
+
+                        // Print what the fail is
+                        console.log("Describe : " + specDetails[i].querySelector('li.suite-detail').innerText);
+                        console.log("");
+
+                        // Print out specs
+                        var specs = specDetails[i].querySelectorAll('ul.specs');
+                        for(var j = 0; j < specs.length; j++)
+                        {
+                            console.log("   it: " + specs[i].innerText);
+                        }
+                    }
+                }
+                else
+                {
+                    // We failed
+                    console.log("----------------------------------------------------------------------");
+
+                    // Get bar failed
+                    console.log(document.body.querySelector(".jasmine_html-reporter > div.alert > span.failed").innerText);
+                    console.log("----------------------------------------------------------------------");
+                    console.log(document.body.querySelector(".jasmine_html-reporter > div.alert > span.failure-list").innerText);
+
+                    // Get results
+                    var specDetails = document.body.querySelectorAll('div.results > div.failures > div.spec-detail');
+
+                    // Print each fail
+                    for(var i = 0; i < specDetails.length; i ++)
+                    {
+                        console.log('Failed test: ' + i);
+
+                        // Print what the fail is
+                        console.log(specDetails[i].querySelector('div.description').innerText);
+                        console.log("");
+
+                        // Print error
+                        console.log("Reference Error:");
+                        console.log(specDetails[i].querySelector('div.messages > div.result-message').innerText);
+                        console.log("");
+                    }
                 }
             });
             phantom.exit(exitCode);
