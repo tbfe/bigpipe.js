@@ -1,7 +1,14 @@
 language: node_js
 node_js:
   - "0.11"
+env:
+  global:
+    - secure: gr1kO9iA5xqKpL4OBdGE4tZj+Vp/woTQ2GOYW9YXbyNZreORRNledLVXP3nFL55OT81KPtkY5ePtgAGjZzWZ2SBYjDBhChkWxhdlVCTR6Xg6mYa4XW3lceE37ZwK6f/f77xldtq1gCcEihwHPlYx79f3xIr/4BqTG6W4bIeTua0=
+    - secure: Sl9INj+Z6RmCoIDW4aqo7OimK5qOh2ZoG7r8/+ytTU2vuZYJl1JKl+HGRuQAM3NrZqfvssEiDwMsL56rgtSOpM4KEv2VYMHwR+QovNKYusTvGC8dHld0mFB2+RkvC7TNc2uDvfIuUENq42/ajwU0vFQOfM/cRdhz1LZ9+tJxoJ0=
 before_script:
   - npm install -g bower
   - bower install
+  - npm install -g grunt-cli
   - phantomjs --version;
+addons:
+  sauce_connect: true
