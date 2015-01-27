@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node test/serve & SERVER_PID=$!; phantomjs test/runner.js test/index.html; kill $SERVER_PID"
+    "test": "./test.sh"
   },
   "author": "",
   "license": "MIT",
