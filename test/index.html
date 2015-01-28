@@ -86,15 +86,18 @@
         it('load script', function(done) {
             scriptLoader.load('scripts/script-loader-test/inc.js').then(function(){
                 expect(window.scriptTestCounter).toBe(1);
-                scriptLoader.load('scripts/script-loader-test/inc.js').then(function(){
-                    expect(window.scriptTestCounter).toBe(2);
-                    scriptLoader.load([
-                        'scripts/script-loader-test/inc.js',
-                        'scripts/script-loader-test/reset.js'
-                    ]).then(function(){
-                        expect(window.scriptTestCounter).toBe(0);
-                    });
-                });
+            }).then(function(){
+                return scriptLoader.load('scripts/script-loader-test/inc.js');
+            }).then(function(){
+                expect(window.scriptTestCounter).toBe(2);
+            }).then(function(){
+                return scriptLoader.load([
+                    'scripts/script-loader-test/inc.js',
+                    'scripts/script-loader-test/reset.js'
+                ]);
+            }).then(function(){
+                expect(window.scriptTestCounter).toBe(0);
+                done();
             });
         });
     });
