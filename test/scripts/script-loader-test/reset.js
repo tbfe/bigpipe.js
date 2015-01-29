@@ -1,1 +1,0 @@
-window.scriptTestCounter = 0;

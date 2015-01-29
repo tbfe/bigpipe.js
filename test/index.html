@@ -24,6 +24,7 @@
     <div id="style-manager-test1"></div>
     <div id="style-manager-test2"></div>
     <div id="style-manager-test3"></div>
+    <div id="style-manager-test4"></div>
     <script>
     describe("Style Manager", function() {
         var styleManager = Bigpipe.styleManager;
@@ -42,7 +43,8 @@
         it("Multiple styles loading", function(done) {
             var target = document.getElementById('style-manager-test2');
             styleManager.load([
-                'styles/style-manager-test2/height.css',
+                //height.css 是个很大的文件，会在 lineHeight.css 之后完成加载
+                'styles/style-manager-test2/height.css?nocache=' + Date.now(),
                 'styles/style-manager-test2/lineHeight.css'
             ]).then(function(){
                 var cssStyles = getComputedStyle(target);
@@ -78,25 +80,91 @@
             });
         });
 
+        it("Promised", function(done) {
+            var originalStylesLength = document.styleSheets.length;
+            var target = document.getElementById('style-manager-test4');
+            Promise.all([
+                styleManager.load('styles/style-manager-test4/height.css').then(function(){
+                    expect(getComputedStyle(target).height).toBe('10px');
+                }),
+                styleManager.load('styles/style-manager-test4/height.css').then(function(){
+                    expect(getComputedStyle(target).height).toBe('10px');
+                })
+            ]).then(function() {
+                expect(document.styleSheets.length).toBe(originalStylesLength + 1);
+                done();
+            });
+        });
+
+        it("config", function(done) {
+            styleManager.config({
+                urlsGenerator: function(ids) {
+                    var urls = [];
+                    for (var i = ids.length - 1; i >= 0; i--) {
+                        urls.unshift('styles/' + ids);
+                    }
+                    return urls;
+                }
+            });
+            var target = document.getElementById('style-manager-test1');
+            styleManager.load('style-manager-test1/height.css').then(function(){
+                expect(getComputedStyle(target).height).toBe('10px');
+            }).then(function() {
+                return styleManager.unload('style-manager-test1/height.css');
+            }).then(function(){
+                expect(getComputedStyle(target).height).toBe('0px');
+                done();
+            });
+        });
+
     });
     </script>
     <script>
-    describe('Script Loader', function() {
+    describe('Script Loader', function(done) {
         var scriptLoader = Bigpipe.scriptLoader;
         it('load script', function(done) {
-            scriptLoader.load('scripts/script-loader-test/inc.js').then(function(){
+            //无论怎么 load，同一个 js 只会加载执行一次
+            Promise.all([
+                scriptLoader.load('scripts/script-loader-test/inc.js').then(function(){
+                    expect(window.scriptTestCounter).toBe(1);
+                }).then(function(){
+                    return scriptLoader.load('scripts/script-loader-test/inc.js');
+                }).then(function(){
+                    expect(window.scriptTestCounter).toBe(1);
+                }),
+
+                scriptLoader.load('scripts/script-loader-test/inc.js').then(function(){
+                    expect(window.scriptTestCounter).toBe(1);
+                }),
+                scriptLoader.load('scripts/script-loader-test/inc.js').then(function(){
+                    expect(window.scriptTestCounter).toBe(1);
+                })
+            ]).then(done);
+        });
+
+        it("Multiple script loading", function(done) {
+            scriptLoader.load([
+                'scripts/script-loader-test/mod_a.js',
+                'scripts/script-loader-test/mod_b.js'
+            ]).then(function(){
+                expect(window.modA).toBe(true);
+                expect(window.modB).toBe(true);
+                done();
+            });
+        });
+
+        it("config", function(done) {
+            scriptLoader.config({
+                urlsGenerator: function(ids) {
+                    var urls = [];
+                    for (var i = ids.length - 1; i >= 0; i--) {
+                        urls.unshift('scripts/' + ids);
+                    }
+                    return urls;
+                }
+            });
+            scriptLoader.load('script-loader-test/inc.js').then(function(){
                 expect(window.scriptTestCounter).toBe(1);
-            }).then(function(){
-                return scriptLoader.load('scripts/script-loader-test/inc.js');
-            }).then(function(){
-                expect(window.scriptTestCounter).toBe(2);
-            }).then(function(){
-                return scriptLoader.load([
-                    'scripts/script-loader-test/inc.js',
-                    'scripts/script-loader-test/reset.js'
-                ]);
-            }).then(function(){
-                expect(window.scriptTestCounter).toBe(0);
                 done();
             });
         });
