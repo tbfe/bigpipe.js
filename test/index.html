@@ -11,6 +11,8 @@
         jasmine.getEnv().addReporter(new jasmine.JSReporter2());
     </script>
     <script src="../bower_components/es6-promise/promise.js"></script>
+    <script src="../bower_components/bind-polyfill/index.js"></script>
+    <script src="../bower_components/polyfill-string/lib/polyfill-string.js"></script>
     <script>
         ES6Promise.polyfill();
     </script>
@@ -20,6 +22,7 @@
         window.Pagelet = Bigpipe.Pagelet;
         window.pagelets = Bigpipe.pagelets;
     </script>
+    <script src="//cdn.polyfill.io/v1/polyfill.js?features=getComputedStyle"></script>
 </head>
 
 <body>

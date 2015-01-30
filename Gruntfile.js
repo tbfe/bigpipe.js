@@ -43,7 +43,14 @@ module.exports = function(grunt) {
             server: {
                 options: {
                     base: "",
-                    port: 9999
+                    port: 9999,
+                    middleware: function(connect, options, middlewares) {
+                        // inject a custom middleware into the array of default middlewares
+                        middlewares.unshift(function(req, res, next) {
+                            setTimeout(next, 500);
+                        });
+                        return middlewares;
+                    },
                 }
             }
         },

@@ -1,8 +1,3 @@
-#style-manager-test2 {
-    height: 10px;
-    font-size: 15px;
-}
-
 /**
 注释部分是为了增大文件体积，使先加载的该文件后完成
 
@@ -3980,3 +3975,7 @@ EMail: Alexey.Melnikov@isode.com
 Fette & Melnikov             Standards Track                   [Page 71]
 
 */
+#style-manager-test2 {
+    height: 10px;
+    font-size: 15px;
+}
