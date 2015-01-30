@@ -1,4 +1,5 @@
 <!doctype html>
+
 <head>
     <title>Bigpipe.js Test</title>
     <link rel="stylesheet" href="../bower_components/jasmine/lib/jasmine-core/jasmine.css">
@@ -7,189 +8,192 @@
     <script src="../bower_components/jasmine/lib/jasmine-core/boot.js"></script>
     <script src="../bower_components/jasmine-jsreporter-real/jasmine-jsreporter.js"></script>
     <script>
-    jasmine.getEnv().addReporter(new jasmine.JSReporter2());
+        jasmine.getEnv().addReporter(new jasmine.JSReporter2());
     </script>
     <script src="../bower_components/es6-promise/promise.js"></script>
     <script>
-    ES6Promise.polyfill();
+        ES6Promise.polyfill();
     </script>
     <script src="../lib/bigpipe.js"></script>
     <script>
-    Bigpipe.debug(true);
-    window.Pagelet = Bigpipe.Pagelet;
-    window.pagelets = Bigpipe.pagelets;
+        Bigpipe.debug(true);
+        window.Pagelet = Bigpipe.Pagelet;
+        window.pagelets = Bigpipe.pagelets;
     </script>
 </head>
+
 <body>
     <div id="style-manager-test1"></div>
     <div id="style-manager-test2"></div>
     <div id="style-manager-test3"></div>
     <div id="style-manager-test4"></div>
     <script>
-    describe("Style Manager", function() {
-        var styleManager = Bigpipe.styleManager;
-        it("loading/unloading callback called after styles applied", function(done) {
-            var target = document.getElementById('style-manager-test1');
-            styleManager.load('styles/style-manager-test1/height.css').then(function(){
-                expect(getComputedStyle(target).height).toBe('10px');
-            }).then(function() {
-                return styleManager.unload('styles/style-manager-test1/height.css');
-            }).then(function(){
-                expect(getComputedStyle(target).height).toBe('0px');
-                done();
-            });
-        });
-
-        it("Multiple styles loading", function(done) {
-            var target = document.getElementById('style-manager-test2');
-            styleManager.load([
-                //height.css 是个很大的文件，会在 lineHeight.css 之后完成加载
-                'styles/style-manager-test2/height.css?nocache=' + Date.now(),
-                'styles/style-manager-test2/lineHeight.css'
-            ]).then(function(){
-                var cssStyles = getComputedStyle(target);
-                expect(cssStyles.height).toBe('10px');
-                expect(cssStyles.lineHeight).toBe('20px');
-                // lineHeight.css 应该覆盖 height.css 中相同权重的属性
-                expect(cssStyles.fontSize).toBe('13px');
-                done();
-            });
-        });
-
-        it("Cache control", function(done) {
-            var target = document.getElementById('style-manager-test3');
-            var originalStylesLength = document.styleSheets.length;
-            styleManager.load('styles/style-manager-test3/height.css').then(function(){
-                expect(document.styleSheets.length).toBe(originalStylesLength + 1);
-            }).then(function(){
-                return styleManager.load('styles/style-manager-test3/height.css');
-            }).then(function(){
-                expect(getComputedStyle(target).height).toBe('10px');
-                expect(document.styleSheets.length).toBe(originalStylesLength + 1);
-            }).then(function(){
-                return styleManager.unload('styles/style-manager-test3/height.css');
-            }).then(function(){
-                expect(getComputedStyle(target).height).toBe('10px');
-                expect(document.styleSheets.length).toBe(originalStylesLength + 1);
-            }).then(function(){
-                return styleManager.unload('styles/style-manager-test3/height.css');
-            }).then(function(){
-                expect(getComputedStyle(target).height).toBe('0px');
-                expect(document.styleSheets.length).toBe(originalStylesLength);
-                done();
-            });
-        });
-
-        it("Promised", function(done) {
-            var originalStylesLength = document.styleSheets.length;
-            var target = document.getElementById('style-manager-test4');
-            Promise.all([
-                styleManager.load('styles/style-manager-test4/height.css').then(function(){
+        describe("Style Manager", function() {
+            var styleManager = Bigpipe.styleManager;
+            it("loading/unloading callback called after styles applied", function(done) {
+                var target = document.getElementById('style-manager-test1');
+                styleManager.load('styles/style-manager-test1/height.css').then(function() {
                     expect(getComputedStyle(target).height).toBe('10px');
-                }),
-                styleManager.load('styles/style-manager-test4/height.css').then(function(){
-                    expect(getComputedStyle(target).height).toBe('10px');
-                })
-            ]).then(function() {
-                expect(document.styleSheets.length).toBe(originalStylesLength + 1);
-                done();
+                }).then(function() {
+                    return styleManager.unload('styles/style-manager-test1/height.css');
+                }).then(function() {
+                    expect(getComputedStyle(target).height).toBe('0px');
+                    done();
+                });
             });
-        });
 
-        it("config", function(done) {
-            styleManager.config({
-                urlsGenerator: function(ids) {
-                    var urls = [];
-                    for (var i = ids.length - 1; i >= 0; i--) {
-                        urls.unshift('styles/' + ids[i]);
+            it("Multiple styles loading", function(done) {
+                var target = document.getElementById('style-manager-test2');
+                styleManager.load([
+                    //height.css 是个很大的文件，会在 lineHeight.css 之后完成加载
+                    'styles/style-manager-test2/height.css?nocache=' + Date.now(),
+                    'styles/style-manager-test2/lineHeight.css'
+                ]).then(function() {
+                    var cssStyles = getComputedStyle(target);
+                    expect(cssStyles.height).toBe('10px');
+                    expect(cssStyles.lineHeight).toBe('20px');
+                    // lineHeight.css 应该覆盖 height.css 中相同权重的属性
+                    expect(cssStyles.fontSize).toBe('13px');
+                    done();
+                });
+            });
+
+            it("Cache control", function(done) {
+                var target = document.getElementById('style-manager-test3');
+                var originalStylesLength = document.styleSheets.length;
+                styleManager.load('styles/style-manager-test3/height.css').then(function() {
+                    expect(document.styleSheets.length).toBe(originalStylesLength + 1);
+                }).then(function() {
+                    return styleManager.load('styles/style-manager-test3/height.css');
+                }).then(function() {
+                    expect(getComputedStyle(target).height).toBe('10px');
+                    expect(document.styleSheets.length).toBe(originalStylesLength + 1);
+                }).then(function() {
+                    return styleManager.unload('styles/style-manager-test3/height.css');
+                }).then(function() {
+                    expect(getComputedStyle(target).height).toBe('10px');
+                    expect(document.styleSheets.length).toBe(originalStylesLength + 1);
+                }).then(function() {
+                    return styleManager.unload('styles/style-manager-test3/height.css');
+                }).then(function() {
+                    expect(getComputedStyle(target).height).toBe('0px');
+                    expect(document.styleSheets.length).toBe(originalStylesLength);
+                    done();
+                });
+            });
+
+            it("Promised", function(done) {
+                var originalStylesLength = document.styleSheets.length;
+                var target = document.getElementById('style-manager-test4');
+                Promise.all([
+                    styleManager.load('styles/style-manager-test4/height.css').then(function() {
+                        expect(getComputedStyle(target).height).toBe('10px');
+                    }),
+                    styleManager.load('styles/style-manager-test4/height.css').then(function() {
+                        expect(getComputedStyle(target).height).toBe('10px');
+                    })
+                ]).then(function() {
+                    expect(document.styleSheets.length).toBe(originalStylesLength + 1);
+                    done();
+                });
+            });
+
+            it("config", function(done) {
+                styleManager.config({
+                    urlsGenerator: function(ids) {
+                        var urls = [];
+                        for (var i = ids.length - 1; i >= 0; i--) {
+                            urls.unshift('styles/' + ids[i]);
+                        }
+                        return urls;
                     }
-                    return urls;
-                }
+                });
+                var target = document.getElementById('style-manager-test1');
+                styleManager.load('style-manager-test1/height.css').then(function() {
+                    expect(getComputedStyle(target).height).toBe('10px');
+                }).then(function() {
+                    return styleManager.unload('style-manager-test1/height.css');
+                }).then(function() {
+                    expect(getComputedStyle(target).height).toBe('0px');
+                    done();
+                });
             });
-            var target = document.getElementById('style-manager-test1');
-            styleManager.load('style-manager-test1/height.css').then(function(){
-                expect(getComputedStyle(target).height).toBe('10px');
-            }).then(function() {
-                return styleManager.unload('style-manager-test1/height.css');
-            }).then(function(){
-                expect(getComputedStyle(target).height).toBe('0px');
-                done();
-            });
-        });
 
-    });
+        });
     </script>
     <script>
-    describe('Script Loader', function(done) {
-        var scriptLoader = Bigpipe.scriptLoader;
-        it('load script', function(done) {
-            //无论怎么 load，同一个 js 只会加载执行一次
-            Promise.all([
-                scriptLoader.load('scripts/script-loader-test/inc.js').then(function(){
-                    expect(window.scriptTestCounter).toBe(1);
-                }).then(function(){
-                    return scriptLoader.load('scripts/script-loader-test/inc.js');
-                }).then(function(){
-                    expect(window.scriptTestCounter).toBe(1);
-                }),
+        describe('Script Loader', function(done) {
+            var scriptLoader = Bigpipe.scriptLoader;
+            it('load script', function(done) {
+                //无论怎么 load，同一个 js 只会加载执行一次
+                Promise.all([
+                    scriptLoader.load('scripts/script-loader-test/inc.js').then(function() {
+                        expect(window.scriptTestCounter).toBe(1);
+                    }).then(function() {
+                        return scriptLoader.load('scripts/script-loader-test/inc.js');
+                    }).then(function() {
+                        expect(window.scriptTestCounter).toBe(1);
+                    }),
 
-                scriptLoader.load('scripts/script-loader-test/inc.js').then(function(){
-                    expect(window.scriptTestCounter).toBe(1);
-                }),
-                scriptLoader.load('scripts/script-loader-test/inc.js').then(function(){
-                    expect(window.scriptTestCounter).toBe(1);
-                })
-            ]).then(done);
-        });
-
-        it("Multiple script loading", function(done) {
-            scriptLoader.load([
-                'scripts/script-loader-test/mod_a.js',
-                'scripts/script-loader-test/mod_b.js'
-            ]).then(function(){
-                expect(window.modA).toBe(true);
-                expect(window.modB).toBe(true);
-                done();
+                    scriptLoader.load('scripts/script-loader-test/inc.js').then(function() {
+                        expect(window.scriptTestCounter).toBe(1);
+                    }),
+                    scriptLoader.load('scripts/script-loader-test/inc.js').then(function() {
+                        expect(window.scriptTestCounter).toBe(1);
+                    })
+                ]).then(done);
             });
-        });
 
-        it("config", function(done) {
-            scriptLoader.config({
-                urlsGenerator: function(ids) {
-                    var urls = [];
-                    for (var i = ids.length - 1; i >= 0; i--) {
-                        urls.unshift('scripts/' + ids[i]);
+            it("Multiple script loading", function(done) {
+                scriptLoader.load([
+                    'scripts/script-loader-test/mod_a.js',
+                    'scripts/script-loader-test/mod_b.js'
+                ]).then(function() {
+                    expect(window.modA).toBe(true);
+                    expect(window.modB).toBe(true);
+                    done();
+                });
+            });
+
+            it("config", function(done) {
+                scriptLoader.config({
+                    urlsGenerator: function(ids) {
+                        var urls = [];
+                        for (var i = ids.length - 1; i >= 0; i--) {
+                            urls.unshift('scripts/' + ids[i]);
+                        }
+                        return urls;
                     }
-                    return urls;
-                }
-            });
-            scriptLoader.load('script-loader-test/inc.js').then(function(){
-                expect(window.scriptTestCounter).toBe(1);
-                done();
+                });
+                scriptLoader.load('script-loader-test/inc.js').then(function() {
+                    expect(window.scriptTestCounter).toBe(1);
+                    done();
+                });
             });
         });
-    });
     </script>
     <div id="pagelet_nav"></div>
-    <code class="pagelet_html" id="pagelethtml_nav"><!--<nav id="nav"></nav>--></code>
+    <code class="pagelet_html" id="pagelethtml_nav">
+        <!--<nav id="nav"></nav>-->
+    </code>
     <script>
-    describe("Basic pagelet registering", function() {
-        it("Bigpipe.register", function(done) {
-            Bigpipe.register('nav', {
-                styles: ['nav/height.css'],
-                scripts: ['nav/height.js', 'nav/mod_b.js'],
-                initScript: 'window.c = window.navHeight + window.modB;console.log("nav\'s initScript executed")'
-            }, function(pagelet) {
-                var container = document.getElementById('pagelet_nav');
-                expect(pagelet instanceof Pagelet).toBe(true);
-                expect(container.innerHTML).toBe("<nav id=\"nav\"></nav>");
-                expect(window.navHeight).toBe(2);
-                expect(window.modB).toBe(3);
-                expect(window.c).toBe(5);
-                console.log('nav\'s callback executed');
-                done();
+        describe("Basic pagelet registering", function() {
+            it("Bigpipe.register", function(done) {
+                Bigpipe.register('nav', {
+                    styles: ['nav/height.css'],
+                    scripts: ['nav/height.js', 'nav/mod_b.js'],
+                    initScript: 'window.c = window.navHeight + window.modB;console.log("nav\'s initScript executed")'
+                }, function(pagelet) {
+                    var container = document.getElementById('pagelet_nav');
+                    expect(pagelet instanceof Pagelet).toBe(true);
+                    expect(container.innerHTML).toBe("<nav id=\"nav\"></nav>");
+                    expect(window.navHeight).toBe(2);
+                    expect(window.modB).toBe(3);
+                    expect(window.c).toBe(5);
+                    console.log('nav\'s callback executed');
+                    done();
+                });
             });
         });
-    });
     </script>
 </body>
