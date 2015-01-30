@@ -101,7 +101,7 @@
                 urlsGenerator: function(ids) {
                     var urls = [];
                     for (var i = ids.length - 1; i >= 0; i--) {
-                        urls.unshift('styles/' + ids);
+                        urls.unshift('styles/' + ids[i]);
                     }
                     return urls;
                 }
@@ -158,7 +158,7 @@
                 urlsGenerator: function(ids) {
                     var urls = [];
                     for (var i = ids.length - 1; i >= 0; i--) {
-                        urls.unshift('scripts/' + ids);
+                        urls.unshift('scripts/' + ids[i]);
                     }
                     return urls;
                 }
@@ -171,20 +171,23 @@
     });
     </script>
     <div id="pagelet_nav"></div>
-    <code class="pagelet_html"><!--<nav id="nav"></nav>--></code>
+    <code class="pagelet_html" id="pagelethtml_nav"><!--<nav id="nav"></nav>--></code>
     <script>
     describe("Basic pagelet registering", function() {
         it("Bigpipe.register", function(done) {
             Bigpipe.register('nav', {
                 styles: ['nav/height.css'],
                 scripts: ['nav/height.js', 'nav/mod_b.js'],
-                initScript: "window.navC = window.navHeight + window.navB;"
+                initScript: 'window.c = window.navHeight + window.modB;console.log("nav\'s initScript executed")'
             }, function(pagelet) {
                 var container = document.getElementById('pagelet_nav');
+                expect(pagelet instanceof Pagelet).toBe(true);
                 expect(container.innerHTML).toBe("<nav id=\"nav\"></nav>");
                 expect(window.navHeight).toBe(2);
-                expect(window.navB).toBe(3);
-                expect(window.navC).toBe(5);
+                expect(window.modB).toBe(3);
+                expect(window.c).toBe(5);
+                console.log('nav\'s callback executed');
+                done();
             });
         });
     });
