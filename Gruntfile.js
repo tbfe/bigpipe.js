@@ -13,10 +13,6 @@ module.exports = function(grunt) {
         platform: "OS X 10.10"
     }, {
         browserName: "internet explorer",
-        platform: "XP",
-        version: "8"
-    }, {
-        browserName: "internet explorer",
         platform: "WIN7",
         version: "9"
     }, {
@@ -47,7 +43,7 @@ module.exports = function(grunt) {
                     middleware: function(connect, options, middlewares) {
                         // inject a custom middleware into the array of default middlewares
                         middlewares.unshift(function(req, res, next) {
-                            setTimeout(next, 500);
+                            setTimeout(next, 400);
                         });
                         return middlewares;
                     },

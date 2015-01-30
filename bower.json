@@ -18,8 +18,6 @@
     "jasmine-jsreporter-real": "*"
   },
   "dependencies": {
-    "es6-promise": "~2",
-    "bind-polyfill": "~1.0.0",
-    "polyfill-string": "johnhenry/polyfill-string"
+    "es6-promise": "~2"
   }
 }
