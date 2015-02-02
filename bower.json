@@ -6,6 +6,7 @@
   ],
   "license": "MIT",
   "private": true,
+  "main": "lib",
   "ignore": [
     "**/.*",
     "node_modules",
