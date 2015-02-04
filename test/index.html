@@ -185,14 +185,27 @@
                     initScript: 'window.c = window.navHeight + window.modB;console.log("nav\'s initScript executed")'
                 }, function(pagelet) {
                     var container = document.getElementById('pagelet_nav');
+                    var htmlContainer = document.getElementById('pagelethtml_nav');
                     expect(pagelet instanceof Pagelet).toBe(true);
                     expect(container.innerHTML).toBe("<nav id=\"nav\"></nav>");
+                    expect(htmlContainer).toBe(null);
                     expect(window.navHeight).toBe(2);
                     expect(window.modB).toBe(3);
                     expect(window.c).toBe(5);
                     console.log('nav\'s callback executed');
                     done();
                 });
+            });
+            it("config", function() {
+                function staticUrlGenerator(ids) {
+                    return ids;
+                }
+                Bigpipe.config({
+                    getStylesUrl: staticUrlGenerator,
+                    getScriptsUrl: staticUrlGenerator
+                });
+                expect(Bigpipe.styleManager._getUrl).toBe(staticUrlGenerator);
+                expect(Bigpipe.scriptLoader._getUrl).toBe(staticUrlGenerator);
             });
         });
     </script>
