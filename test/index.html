@@ -23,10 +23,12 @@
 </head>
 
 <body>
-    <div id="style-manager-test1"></div>
-    <div id="style-manager-test2"></div>
-    <div id="style-manager-test3"></div>
-    <div id="style-manager-test4"></div>
+    <div style="height:0;">
+        <div id="style-manager-test1"></div>
+        <div id="style-manager-test2"></div>
+        <div id="style-manager-test3"></div>
+        <div id="style-manager-test4"></div>
+    </div>
     <script>
         describe("Style Manager", function() {
             var styleManager = Bigpipe.styleManager;
@@ -172,28 +174,65 @@
             });
         });
     </script>
-    <div id="pagelet_nav"></div>
-    <code class="pagelet_html" id="pagelethtml_nav">
-        <!--<nav id="nav"></nav>-->
-    </code>
+    <div style="display:none;">
+        <div id="pagelet_nav"></div>
+        <code class="pagelet_html" id="pagelethtml_nav">
+            <!--<nav id="nav"></nav>-->
+        </code>
+
+        <div id="pagelet_outer"></div>
+        <code class="pagelet_html" id="pagelethtml_outer">
+            <!--outer<div id="pagelet_inner"></div>-->
+        </code>
+        <code class="pagelet_html" id="pagelethtml_inner">
+            <!--<div>inner</div>-->
+        </code>
+    </div>
     <script>
-        describe("Basic pagelet registering", function() {
-            it("Bigpipe.register", function(done) {
-                Bigpipe.register('nav', {
-                    styles: ['nav/height.css'],
-                    scripts: ['nav/height.js', 'nav/mod_b.js'],
-                    initScript: 'window.c = window.navHeight + window.modB;console.log("nav\'s initScript executed")'
-                }, function(pagelet) {
-                    var container = document.getElementById('pagelet_nav');
-                    var htmlContainer = document.getElementById('pagelethtml_nav');
-                    expect(pagelet instanceof Pagelet).toBe(true);
-                    expect(container.innerHTML).toBe("<nav id=\"nav\"></nav>");
-                    expect(htmlContainer).toBe(null);
-                    expect(window.navHeight).toBe(2);
-                    expect(window.modB).toBe(3);
-                    expect(window.c).toBe(5);
-                    console.log('nav\'s callback executed');
-                    done();
+        describe("Pagelet", function() {
+            describe("register", function() {
+                it("Basic Bigpipe.register", function(done) {
+                    Bigpipe.register('nav', {
+                        styles: ['nav/height.css'],
+                        scripts: ['nav/height.js', 'nav/mod_b.js'],
+                        initScript: 'window.c = window.navHeight + window.modB;console.log("nav\'s initScript executed")'
+                    }, function(pagelet) {
+                        var container = document.getElementById('pagelet_nav');
+                        var htmlContainer = document.getElementById('pagelethtml_nav');
+                        expect(pagelet instanceof Pagelet).toBe(true);
+                        expect(container.innerHTML).toBe("<nav id=\"nav\"></nav>");
+                        expect(htmlContainer).toBe(null);
+                        expect(window.navHeight).toBe(2);
+                        expect(window.modB).toBe(3);
+                        expect(window.c).toBe(5);
+                        console.log('nav\'s callback executed');
+                        done();
+                    });
+                });
+                it("Nested pagelet register", function(done) {
+                    Bigpipe.register('inner', {
+                        parent: 'outer',
+                        styles: ['nested/inner.css'],
+                        scripts: ['nested/inner.js'],
+                        initScript: 'window.innerInited = true; console.log("inner\'s initScript executed")'
+                    }, function(pagelet) {
+                        var container = document.getElementById('pagelet_inner');
+                        expect(container).not.toBe(null);
+                        console.log('inner\'s callback executed');
+                    });
+                    window.setTimeout(function() {
+                        Bigpipe.register('outer', {
+                            styles: ['nested/outer.css'],
+                            scripts: ['nested/outer.js'],
+                            initScript: 'console.log("outer\'s initScript executed")'
+                        }, function(pagelet) {
+                            var container = document.getElementById('pagelet_outer');
+                            expect(window.innerInited).toBe(true);
+                            expect(container.innerHTML).toBe("outer<div id=\"pagelet_inner\"><div>inner</div></div>");
+                            console.log('outer\'s callback executed');
+                            done();
+                        });
+                    }, 200);
                 });
             });
             it("config", function() {
