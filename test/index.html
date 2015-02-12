@@ -48,7 +48,7 @@
                 var target = document.getElementById('style-manager-test2');
                 styleManager.load([
                     //height.css 是个很大的文件，会在 lineHeight.css 之后完成加载
-                    'styles/style-manager-test2/height.css?nocache=' + Date.now(),
+                    'styles/style-manager-test2/height.css?ttf=1000',
                     'styles/style-manager-test2/lineHeight.css'
                 ]).then(function() {
                     var cssStyles = getComputedStyle(target);

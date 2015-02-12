@@ -1,20 +1,14 @@
+var url = require('url');
+
 module.exports = function(grunt) {
     require('load-grunt-tasks')(grunt);
 
     var browsers = [{
-        browserName: "chrome",
-        platform: "XP"
+        browserName: "chrome"
     }, {
         browserName: "chrome",
         platform: "XP",
         version: "30"
-    }, {
-        browserName: "chrome",
-        platform: "OS X 10.10"
-    }, {
-        browserName: "internet explorer",
-        platform: "WIN7",
-        version: "9"
     }, {
         browserName: "internet explorer",
         version: "10"
@@ -43,7 +37,10 @@ module.exports = function(grunt) {
                     middleware: function(connect, options, middlewares) {
                         // inject a custom middleware into the array of default middlewares
                         middlewares.unshift(function(req, res, next) {
-                            setTimeout(next, 400);
+                            var url_parts = url.parse(req.url, true);
+                            var query = url_parts.query;
+                            var ttf = query.ttf || 400;
+                            setTimeout(next, ttf);
                         });
                         return middlewares;
                     },
