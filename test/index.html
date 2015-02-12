@@ -193,9 +193,12 @@
             describe("register", function() {
                 it("Basic Bigpipe.register", function(done) {
                     Bigpipe.register('nav', {
-                        styles: ['nav/height.css'],
-                        scripts: ['nav/height.js', 'nav/mod_b.js'],
-                        initScript: 'window.c = window.navHeight + window.modB;console.log("nav\'s initScript executed")'
+                        styles: ['nav/height.css?ttl=500'],
+                        scripts: ['nav/mod_a.js', 'nav/mod_b.js'],
+                        initScript: 'var height = window.getComputedStyle(nav).height;' +
+                            'window.navHeight = Number(height.split("px")[0]);' +
+                            'window.sum = window.navHeight + window.modA + window.modB;' +
+                            'console.log("nav\'s initScript executed")'
                     }, function(pagelet) {
                         var container = document.getElementById('pagelet_nav');
                         var htmlContainer = document.getElementById('pagelethtml_nav');
@@ -203,8 +206,9 @@
                         expect(container.innerHTML).toBe("<nav id=\"nav\"></nav>");
                         expect(htmlContainer).toBe(null);
                         expect(window.navHeight).toBe(2);
+                        expect(window.modA).toBe(3);
                         expect(window.modB).toBe(3);
-                        expect(window.c).toBe(5);
+                        expect(window.sum).toBe(8);
                         console.log('nav\'s callback executed');
                         done();
                     });
