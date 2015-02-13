@@ -60,7 +60,23 @@ module.exports = function(grunt) {
                 }
             }
         },
-        watch: {}
+        watch: {
+            scripts: {
+                files: ['lib/*.js'],
+                tasks: ['jsdoc'],
+                options: {
+                    spawn: false,
+                },
+            },
+        },
+        jsdoc: {
+            dist: {
+                src: ['lib/*.js'],
+                options: {
+                    destination: 'doc'
+                }
+            }
+        }
     });
 
 
