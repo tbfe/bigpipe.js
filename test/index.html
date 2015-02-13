@@ -194,12 +194,12 @@
                 it("Basic Bigpipe.register", function(done) {
                     Bigpipe.register('nav', {
                         styles: ['nav/height.css?ttl=500'],
-                        scripts: ['nav/mod_a.js', 'nav/mod_b.js'],
-                        initScript: 'var height = window.getComputedStyle(nav).height;' +
-                            'window.navHeight = Number(height.split("px")[0]);' +
-                            'window.sum = window.navHeight + window.modA + window.modB;' +
-                            'console.log("nav\'s initScript executed")'
-                    }, function(pagelet) {
+                        scripts: ['nav/mod_a.js', 'nav/mod_b.js']
+                    }).then(function(pagelet) {
+                        var height = window.getComputedStyle(nav).height;
+                        window.navHeight = Number(height.split("px")[0]);
+                        console.log("nav\'s initScript executed");
+
                         var container = document.getElementById('pagelet_nav');
                         var htmlContainer = document.getElementById('pagelethtml_nav');
                         expect(pagelet instanceof Pagelet).toBe(true);
@@ -208,7 +208,6 @@
                         expect(window.navHeight).toBe(2);
                         expect(window.modA).toBe(3);
                         expect(window.modB).toBe(3);
-                        expect(window.sum).toBe(8);
                         console.log('nav\'s callback executed');
                         done();
                     });
@@ -217,9 +216,11 @@
                     Bigpipe.register('inner', {
                         parent: 'outer',
                         styles: ['nested/inner.css'],
-                        scripts: ['nested/inner.js'],
-                        initScript: 'window.innerInited = true; console.log("inner\'s initScript executed")'
-                    }, function(pagelet) {
+                        scripts: ['nested/inner.js']
+                    }).then(function(pagelet) {
+                        window.innerInited = true;
+                        console.log("inner\'s initScript executed");
+
                         var container = document.getElementById('pagelet_inner');
                         expect(container).not.toBe(null);
                         console.log('inner\'s callback executed');
@@ -227,9 +228,10 @@
                     window.setTimeout(function() {
                         Bigpipe.register('outer', {
                             styles: ['nested/outer.css'],
-                            scripts: ['nested/outer.js'],
-                            initScript: 'console.log("outer\'s initScript executed")'
-                        }, function(pagelet) {
+                            scripts: ['nested/outer.js']
+                        }).then(function(pagelet) {
+                            console.log("outer\'s initScript executed");
+
                             var container = document.getElementById('pagelet_outer');
                             expect(window.innerInited).toBe(true);
                             expect(container.innerHTML).toBe("outer<div id=\"pagelet_inner\"><div>inner</div></div>");
