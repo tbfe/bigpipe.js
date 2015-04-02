@@ -187,6 +187,20 @@
         <code class="pagelet_html" id="pagelethtml_inner">
             <!--<div>inner</div>-->
         </code>
+
+        <div id="pagelet_event_parent"></div>
+        <code class="pagelet_html" id="pagelethtml_event_parent">
+            <!--<div id="pagelet_event_target"></div><div id="pagelet_event_sibling"></div>-->
+        </code>
+        <code class="pagelet_html" id="pagelethtml_event_target">
+            <!--<div id="pagelet_event_child"></div>-->
+        </code>
+        <code class="pagelet_html" id="pagelethtml_event_sibling">
+            <!---->
+        </code>
+        <code class="pagelet_html" id="pagelethtml_event_child">
+            <!---->
+        </code>
     </div>
     <script>
         describe("Pagelet", function() {
@@ -239,6 +253,65 @@
                             done();
                         });
                     }, 200);
+                });
+            });
+            describe("event", function() {
+                var targetPagelet, parentPagelet, childPagelet, siblingPagelet,
+                    targetCallback, parentCallback, childCallback, siblingCallback;
+                var loadAllPagelets = Promise.all([
+                    Bigpipe.register('event_parent').then(function(pagelet) {
+                        parentPagelet = pagelet;
+                    }),
+                    Bigpipe.register('event_target', {
+                        parent: 'event_parent',
+                    }).then(function(pagelet) {
+                        targetPagelet = pagelet;
+                    }),
+                    Bigpipe.register('event_child', {
+                        parent: 'event_target',
+                    }).then(function(pagelet) {
+                        childPagelet = pagelet;
+                    }),
+                    Bigpipe.register('event_sibling', {
+                        parent: 'event_parent',
+                    }).then(function(pagelet) {
+                        siblingPagelet = pagelet;
+                    })
+                ]);
+                beforeEach(function(done) {
+                    loadAllPagelets.then(done);
+                });
+
+                function registerCallbacks(eventName) {
+                    targetCallback = jasmine.createSpy('targetCallback');
+                    parentCallback = jasmine.createSpy('parentCallback');
+                    childCallback = jasmine.createSpy('childCallback');
+                    siblingCallback = jasmine.createSpy('siblingCallback');
+                    targetPagelet.on(eventName, targetCallback);
+                    parentPagelet.on(eventName, parentCallback);
+                    childPagelet.on(eventName, childCallback);
+                    siblingPagelet.on(eventName, siblingCallback);
+                }
+
+                it('emit', function() {
+                    var eventName = 'emitedEvent';
+                    var callbackArgument = 'emitedEventData';
+                    registerCallbacks(eventName);
+                    targetPagelet.emit(eventName, callbackArgument);
+                    expect(targetCallback).toHaveBeenCalledWith(callbackArgument);
+                    expect(parentCallback).toHaveBeenCalledWith(callbackArgument);
+                    expect(siblingCallback).not.toHaveBeenCalled();
+                    expect(childCallback).not.toHaveBeenCalled();
+                });
+                it('broadcast', function() {
+                    var eventName = 'broadcastedEvent';
+                    var callbackArgument = 'broadcastedEventData';
+                    registerCallbacks(eventName);
+                    targetPagelet.broadcast(eventName, callbackArgument);
+                    expect(targetCallback).toHaveBeenCalledWith(callbackArgument);
+                    expect(parentCallback).not.toHaveBeenCalled();
+                    expect(siblingCallback).not.toHaveBeenCalled();
+                    expect(childCallback).toHaveBeenCalledWith(callbackArgument);
                 });
             });
             it("config", function() {
