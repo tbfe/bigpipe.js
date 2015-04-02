@@ -203,7 +203,7 @@
         </code>
     </div>
     <script>
-        describe("Pagelet", function() {
+        describe("Bigpipe", function() {
             describe("register", function() {
                 it("Basic Bigpipe.register", function(done) {
                     Bigpipe.register('nav', {
@@ -295,23 +295,33 @@
 
                 it('emit', function() {
                     var eventName = 'emitedEvent';
-                    var callbackArgument = 'emitedEventData';
+                    var data = 'emitedEventData';
                     registerCallbacks(eventName);
-                    targetPagelet.emit(eventName, callbackArgument);
-                    expect(targetCallback).toHaveBeenCalledWith(callbackArgument);
-                    expect(parentCallback).toHaveBeenCalledWith(callbackArgument);
+                    targetPagelet.emit(eventName, data);
+                    expect(targetCallback).toHaveBeenCalledWith(data);
+                    expect(parentCallback).toHaveBeenCalledWith(data);
                     expect(siblingCallback).not.toHaveBeenCalled();
                     expect(childCallback).not.toHaveBeenCalled();
                 });
                 it('broadcast', function() {
                     var eventName = 'broadcastedEvent';
-                    var callbackArgument = 'broadcastedEventData';
+                    var data = 'broadcastedEventData';
                     registerCallbacks(eventName);
-                    targetPagelet.broadcast(eventName, callbackArgument);
-                    expect(targetCallback).toHaveBeenCalledWith(callbackArgument);
+                    targetPagelet.broadcast(eventName, data);
+                    expect(targetCallback).toHaveBeenCalledWith(data);
                     expect(parentCallback).not.toHaveBeenCalled();
                     expect(siblingCallback).not.toHaveBeenCalled();
-                    expect(childCallback).toHaveBeenCalledWith(callbackArgument);
+                    expect(childCallback).toHaveBeenCalledWith(data);
+                });
+                it('global broadcast', function() {
+                    var eventName = 'global broadcastedEvent';
+                    var data = 'global broadcastedEventData';
+                    registerCallbacks(eventName);
+                    Bigpipe.broadcast(eventName, data);
+                    expect(targetCallback).toHaveBeenCalledWith(data);
+                    expect(parentCallback).toHaveBeenCalledWith(data);
+                    expect(siblingCallback).toHaveBeenCalledWith(data);
+                    expect(childCallback).toHaveBeenCalledWith(data);
                 });
             });
             it("config", function() {
