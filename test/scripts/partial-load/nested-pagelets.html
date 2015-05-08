@@ -1,0 +1,15 @@
+<script>
+    Bigpipe.register("refresh_inner", {
+        parent: 'refresh_outer',
+        "content": "INNER"
+    }).then(function(pagelet) {
+        console.log("refresh_inner pagelet loaded.");
+    });
+</script>
+<script>
+    Bigpipe.register("refresh_outer", {
+        "content": 'OUTER<div id="pagelet_refresh_inner"></div>'
+    }).then(function(pagelet) {
+        console.log("refresh_outer pagelet loaded.");
+    });
+</script>

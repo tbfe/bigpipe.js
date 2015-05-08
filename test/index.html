@@ -30,6 +30,15 @@
         <div id="style-manager-test4"></div>
     </div>
     <script>
+        describe("Utils", function() {
+            var Utils = Bigpipe.Utils;
+            it("array unique", function() {
+                expect(Utils.unique([])).toEqual([]);
+                expect(Utils.unique([1, 1, 1])).toEqual([1]);
+                expect(Utils.unique([1, 1, 2])).toEqual([1, 2]);
+                expect(Utils.unique([1, '1'])).toEqual([1, '1']);
+            })
+        });
         describe("Style Manager", function() {
             var styleManager = Bigpipe.styleManager;
             it("loading/unloading callback called after styles applied", function(done) {
@@ -188,6 +197,9 @@
             <!--<div>inner</div>-->
         </code>
 
+        <div id="pagelet_json_content"></div>
+        <div id="pagelet_duplicate"></div>
+
         <div id="pagelet_event_parent"></div>
         <code class="pagelet_html" id="pagelethtml_event_parent">
             <!--<div id="pagelet_event_target"></div><div id="pagelet_event_sibling"></div>-->
@@ -201,6 +213,9 @@
         <code class="pagelet_html" id="pagelethtml_event_child">
             <!---->
         </code>
+
+        <div id="pagelet_refresh"></div>
+        <div id="pagelet_refresh_outer"></div>
     </div>
     <script>
         describe("Bigpipe", function() {
@@ -253,6 +268,27 @@
                             done();
                         });
                     }, 200);
+                });
+                it("Register with json encoded content", function(done) {
+                    Bigpipe.register('json_content', {
+                        content: '<div>中文English\'\"<\/div>'
+                    }).then(function(pagelet) {
+                        var container = document.getElementById('pagelet_json_content');
+                        expect(container.innerHTML).toBe('<div>中文English\'\"<\/div>');
+                        done();
+                    });
+                });
+                it("Register an existing pagelet", function(done) {
+                    Bigpipe.register('duplicate', {
+                        content: '1'
+                    }).then(function() {
+                        expect(function() {
+                            Bigpipe.register('duplicate', {
+                                content: '2'
+                            });
+                        }).toThrow();
+                        done();
+                    });
                 });
             });
             describe("event", function() {
@@ -322,6 +358,57 @@
                     expect(parentCallback).toHaveBeenCalledWith(data);
                     expect(siblingCallback).toHaveBeenCalledWith(data);
                     expect(childCallback).toHaveBeenCalledWith(data);
+                });
+            });
+            describe("Partial load", function() {
+                it('refresh pagelet', function(done) {
+                    var firstCallback = jasmine.createSpy('firstCallback');
+                    var destroyCallback = jasmine.createSpy('destroyCallback');
+                    Bigpipe.register('refresh', {
+                        content: '1'
+                    }).then(function(pagelet) {
+                        pagelet.on('event', firstCallback);
+                        pagelet.on('destroy', destroyCallback);
+                        pagelet.refresh({
+                            url: 'scripts/partial-load/pagelet.html'
+                        }).then(function() {
+                            var container = document.getElementById('pagelet_refresh');
+                            pagelet.broadcast('event');
+                            expect(container.innerHTML).toBe('2');
+                            expect(destroyCallback).toHaveBeenCalled();
+                            expect(firstCallback).not.toHaveBeenCalled();
+                            done();
+                        })
+                    });
+                });
+                it('refresh nested pagelets', function(done) {
+                    var outerCallback = jasmine.createSpy('outerCallback');
+                    var innerCallback = jasmine.createSpy('innerCallback');
+                    Promise.all([Bigpipe.register('refresh_outer', {
+                            content: 'outer<div id="pagelet_refresh_inner"></div>'
+                        }).then(function(pagelet) {
+                            pagelet.on('destroy', outerCallback);
+                            return pagelet;
+                        }),
+                        Bigpipe.register('refresh_inner', {
+                            parent: 'refresh_outer',
+                            content: 'inner'
+                        }).then(function(pagelet) {
+                            pagelet.on('destroy', innerCallback);
+                        })
+                    ]).then(function(pagelets) {
+                        pagelets[0].refresh({
+                            url: 'scripts/partial-load/nested-pagelets.html'
+                        }).then(function() {
+                            var outer = document.getElementById('pagelet_refresh_outer');
+                            expect(outer.innerHTML).toMatch(/^OUTER/);
+                            var inner = document.getElementById('pagelet_refresh_inner');
+                            expect(inner.innerHTML).toBe('INNER');
+                            expect(innerCallback).toHaveBeenCalled();
+                            expect(outerCallback).toHaveBeenCalled();
+                            done();
+                        })
+                    });
                 });
             });
             it("config", function() {
