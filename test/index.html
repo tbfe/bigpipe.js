@@ -34,9 +34,14 @@
             var Utils = Bigpipe.Utils;
             it("array unique", function() {
                 expect(Utils.unique([])).toEqual([]);
-                expect(Utils.unique([1, 1, 1])).toEqual([1]);
-                expect(Utils.unique([1, 1, 2])).toEqual([1, 2]);
-                expect(Utils.unique([1, '1'])).toEqual([1, '1']);
+                expect(Utils.unique(['1'])).toEqual(['1']);
+                expect(Utils.unique(['1', '1', '1'])).toEqual(['1']);
+                var result = Utils.unique(['2', '1', '1', '2']);
+                expect(result.length).toEqual(2);
+                expect(result).toEqual(jasmine.arrayContaining(['1', '2']));
+                expect(function(){
+                    Utils.unique([1, '1'])
+                }).toThrow();
             })
         });
 
