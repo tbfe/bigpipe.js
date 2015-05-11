@@ -42,28 +42,21 @@
                 expect(function(){
                     Utils.unique([1, '1'])
                 }).toThrow();
-            })
-        });
-
-        describe("Resource Manager", function() {
-            var resourceManager = Bigpipe.resourceManager;
+            });
             it("combo url", function() {
-                expect(resourceManager.combo([])).toEqual('');
-                expect(resourceManager.combo(['/tb/a.js', '/tb/b.js', '/tb/c.js'])).toEqual('/??/tb/a.js,/tb/b.js,/tb/c.js');
-                expect(resourceManager.combo(['/tb/a.js'])).toEqual('');
-                expect(resourceManager.combo(['/tb/d.js'])).toEqual('/??/tb/d.js');
-                expect(resourceManager.combo(['/tb/a.js', '/tb/b.js', '/tb/e.js'])).toEqual('/??/tb/e.js');
+                expect(Utils.combo([])).toEqual(['']);
+                expect(Utils.combo(['/tb/a.js', '/tb/b.js', '/tb/c.js'])).toEqual(['/tb/a.js,/tb/b.js,/tb/c.js']);
             });
         });
 
         describe("Style Manager", function() {
-            var styleManager = Bigpipe.styleManager;
+            var styleLoader = Bigpipe.styleLoader;
             it("loading/unloading callback called after styles applied", function(done) {
                 var target = document.getElementById('style-manager-test1');
-                styleManager.load('styles/style-manager-test1/height.css').then(function() {
+                styleLoader.load('styles/style-manager-test1/height.css').then(function() {
                     expect(getComputedStyle(target).height).toBe('10px');
                 }).then(function() {
-                    return styleManager.unload('styles/style-manager-test1/height.css');
+                    return styleLoader.unload('styles/style-manager-test1/height.css');
                 }).then(function() {
                     expect(getComputedStyle(target).height).toBe('0px');
                     done();
@@ -72,7 +65,7 @@
 
             it("Multiple styles loading", function(done) {
                 var target = document.getElementById('style-manager-test2');
-                styleManager.load([
+                styleLoader.load([
                     //height.css 是个很大的文件，会在 lineHeight.css 之后完成加载
                     'styles/style-manager-test2/height.css?ttf=1000',
                     'styles/style-manager-test2/lineHeight.css'
@@ -89,20 +82,20 @@
             it("Cache control", function(done) {
                 var target = document.getElementById('style-manager-test3');
                 var originalStylesLength = document.styleSheets.length;
-                styleManager.load('styles/style-manager-test3/height.css').then(function() {
+                styleLoader.load('styles/style-manager-test3/height.css').then(function() {
                     expect(document.styleSheets.length).toBe(originalStylesLength + 1);
                 }).then(function() {
-                    return styleManager.load('styles/style-manager-test3/height.css');
+                    return styleLoader.load('styles/style-manager-test3/height.css');
                 }).then(function() {
                     expect(getComputedStyle(target).height).toBe('10px');
                     expect(document.styleSheets.length).toBe(originalStylesLength + 1);
                 }).then(function() {
-                    return styleManager.unload('styles/style-manager-test3/height.css');
+                    return styleLoader.unload('styles/style-manager-test3/height.css');
                 }).then(function() {
                     expect(getComputedStyle(target).height).toBe('10px');
                     expect(document.styleSheets.length).toBe(originalStylesLength + 1);
                 }).then(function() {
-                    return styleManager.unload('styles/style-manager-test3/height.css');
+                    return styleLoader.unload('styles/style-manager-test3/height.css');
                 }).then(function() {
                     expect(getComputedStyle(target).height).toBe('0px');
                     expect(document.styleSheets.length).toBe(originalStylesLength);
@@ -114,10 +107,10 @@
                 var originalStylesLength = document.styleSheets.length;
                 var target = document.getElementById('style-manager-test4');
                 Promise.all([
-                    styleManager.load('styles/style-manager-test4/height.css').then(function() {
+                    styleLoader.load('styles/style-manager-test4/height.css').then(function() {
                         expect(getComputedStyle(target).height).toBe('10px');
                     }),
-                    styleManager.load('styles/style-manager-test4/height.css').then(function() {
+                    styleLoader.load('styles/style-manager-test4/height.css').then(function() {
                         expect(getComputedStyle(target).height).toBe('10px');
                     })
                 ]).then(function() {
@@ -127,7 +120,7 @@
             });
 
             it("config", function(done) {
-                styleManager.config({
+                styleLoader.config({
                     urlsGenerator: function(ids) {
                         var urls = [];
                         for (var i = ids.length - 1; i >= 0; i--) {
@@ -137,10 +130,10 @@
                     }
                 });
                 var target = document.getElementById('style-manager-test1');
-                styleManager.load('style-manager-test1/height.css').then(function() {
+                styleLoader.load('style-manager-test1/height.css').then(function() {
                     expect(getComputedStyle(target).height).toBe('10px');
                 }).then(function() {
-                    return styleManager.unload('style-manager-test1/height.css');
+                    return styleLoader.unload('style-manager-test1/height.css');
                 }).then(function() {
                     expect(getComputedStyle(target).height).toBe('0px');
                     done();
@@ -436,7 +429,7 @@
                     getStylesUrl: staticUrlGenerator,
                     getScriptsUrl: staticUrlGenerator
                 });
-                expect(Bigpipe.styleManager._getUrl).toBe(staticUrlGenerator);
+                expect(Bigpipe.styleLoader._getUrl).toBe(staticUrlGenerator);
                 expect(Bigpipe.scriptLoader._getUrl).toBe(staticUrlGenerator);
             });
         });
