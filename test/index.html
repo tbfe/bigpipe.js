@@ -39,6 +39,18 @@
                 expect(Utils.unique([1, '1'])).toEqual([1, '1']);
             })
         });
+
+        describe("Resource Manager", function() {
+            var resourceManager = Bigpipe.resourceManager;
+            it("combo url", function() {
+                expect(resourceManager.combo([])).toEqual('');
+                expect(resourceManager.combo(['/tb/a.js', '/tb/b.js', '/tb/c.js'])).toEqual('/??/tb/a.js,/tb/b.js,/tb/c.js');
+                expect(resourceManager.combo(['/tb/a.js'])).toEqual('');
+                expect(resourceManager.combo(['/tb/d.js'])).toEqual('/??/tb/d.js');
+                expect(resourceManager.combo(['/tb/a.js', '/tb/b.js', '/tb/e.js'])).toEqual('/??/tb/e.js');
+            });
+        });
+
         describe("Style Manager", function() {
             var styleManager = Bigpipe.styleManager;
             it("loading/unloading callback called after styles applied", function(done) {
