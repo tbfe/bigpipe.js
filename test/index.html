@@ -195,15 +195,15 @@
     </script>
     <div style="display:none;">
         <div id="pagelet_nav"></div>
-        <code class="pagelet_html" id="pagelethtml_nav">
+        <code class="pagelet_html" id="pagelet_html_nav">
             <!--<nav id="nav"></nav>-->
         </code>
 
         <div id="pagelet_outer"></div>
-        <code class="pagelet_html" id="pagelethtml_outer">
+        <code class="pagelet_html" id="pagelet_html_outer">
             <!--outer<div id="pagelet_inner"></div>-->
         </code>
-        <code class="pagelet_html" id="pagelethtml_inner">
+        <code class="pagelet_html" id="pagelet_html_inner">
             <!--<div>inner</div>-->
         </code>
 
@@ -211,21 +211,22 @@
         <div id="pagelet_duplicate"></div>
 
         <div id="pagelet_event_parent"></div>
-        <code class="pagelet_html" id="pagelethtml_event_parent">
+        <code class="pagelet_html" id="pagelet_html_event_parent">
             <!--<div id="pagelet_event_target"></div><div id="pagelet_event_sibling"></div>-->
         </code>
-        <code class="pagelet_html" id="pagelethtml_event_target">
+        <code class="pagelet_html" id="pagelet_html_event_target">
             <!--<div id="pagelet_event_child"></div>-->
         </code>
-        <code class="pagelet_html" id="pagelethtml_event_sibling">
+        <code class="pagelet_html" id="pagelet_html_event_sibling">
             <!---->
         </code>
-        <code class="pagelet_html" id="pagelethtml_event_child">
+        <code class="pagelet_html" id="pagelet_html_event_child">
             <!---->
         </code>
 
         <div id="pagelet_refresh"></div>
         <div id="pagelet_refresh_outer"></div>
+
     </div>
     <script>
         describe("Bigpipe", function() {
@@ -258,7 +259,7 @@
                         console.log("nav\'s initScript executed");
 
                         var container = document.getElementById('pagelet_nav');
-                        var htmlContainer = document.getElementById('pagelethtml_nav');
+                        var htmlContainer = document.getElementById('pagelet_html_nav');
                         expect(pagelet instanceof Pagelet).toBe(true);
                         expect(container.innerHTML).toBe("<nav id=\"nav\"></nav>");
                         expect(htmlContainer).toBe(null);
