@@ -55,6 +55,7 @@
                 var target = document.getElementById('style-manager-test1');
                 styleLoader.load('styles/style-manager-test1/height.css').then(function() {
                     expect(getComputedStyle(target).height).toBe('10px');
+                    done();
                 }).then(function() {
                     return styleLoader.unload('styles/style-manager-test1/height.css');
                 }).then(function() {
@@ -227,6 +228,16 @@
         <div id="pagelet_refresh"></div>
         <div id="pagelet_refresh_outer"></div>
 
+        <div id="pagelet_combo_test_foo"></div>
+        <code id="pagelet_html_combo_test_foo" class="pagelet_html">
+            <!--<div id="foo" class="meo">foo</div>-->
+        </code>
+
+        <div id="pagelet_combo_test_bar"></div>
+        <code id="pagelet_html_combo_test_bar" class="pagelet_html">
+            <!--<div id="bar" class="meo">bar</div>-->
+        </code>
+
     </div>
     <script>
         describe("Bigpipe", function() {
@@ -316,6 +327,26 @@
                                 content: '2'
                             });
                         }).toThrow();
+                        done();
+                    });
+                });
+                it("Register pagelets with common static resources", function(done) {
+                    Bigpipe.register('combo_test_foo', {
+                        styles: ['combo-test/a.css','combo-test/b.css','combo-test/c.css'],
+                        scripts: ['combo-test/a.js', 'combo-test/b.js']
+                    }).then(function(pagelet) {
+                        var element = document.getElementById('foo');
+
+                        expect(element.innerHTML).toBe('foo');
+                        done();
+                    });
+
+                    Bigpipe.register('combo_test_bar', {
+                        styles: ['combo-test/b.css','combo-test/d.css'],
+                        scripts: ['combo-test/a.js', 'combo-test/e.js']
+                    }).then(function(pagelet) {
+                        var element = document.getElementById('bar');
+                        expect(element.innerHTML).toBe('bar');
                         done();
                     });
                 });
