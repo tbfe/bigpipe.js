@@ -49,7 +49,7 @@
             });
         });
 
-        describe("Style Manager", function() {
+        describe("Style Loader", function() {
             var styleLoader = Bigpipe.styleLoader;
             it("loading/unloading callback called after styles applied", function(done) {
                 var target = document.getElementById('style-manager-test1');
@@ -230,6 +230,24 @@
     <script>
         describe("Bigpipe", function() {
             describe("register", function() {
+                beforeEach(function () {
+                    Bigpipe.config({
+                        getStylesUrl: function(ids) {
+                            var urls = [];
+                            for (var i = ids.length - 1; i >= 0; i--) {
+                                urls.unshift('styles/' + ids[i]);
+                            }
+                            return urls;
+                        },
+                        getScriptsUrl: function(ids) {
+                            var urls = [];
+                            for (var i = ids.length - 1; i >= 0; i--) {
+                                urls.unshift('scripts/' + ids[i]);
+                            }
+                            return urls;
+                        }
+                    });
+                });
                 it("Basic Bigpipe.register", function(done) {
                     Bigpipe.register('nav', {
                         styles: ['nav/height.css?ttl=500'],
@@ -309,17 +327,17 @@
                         parentPagelet = pagelet;
                     }),
                     Bigpipe.register('event_target', {
-                        parent: 'event_parent',
+                        parent: 'event_parent'
                     }).then(function(pagelet) {
                         targetPagelet = pagelet;
                     }),
                     Bigpipe.register('event_child', {
-                        parent: 'event_target',
+                        parent: 'event_target'
                     }).then(function(pagelet) {
                         childPagelet = pagelet;
                     }),
                     Bigpipe.register('event_sibling', {
-                        parent: 'event_parent',
+                        parent: 'event_parent'
                     }).then(function(pagelet) {
                         siblingPagelet = pagelet;
                     })
