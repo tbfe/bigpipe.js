@@ -94,6 +94,6 @@ module.exports = function(grunt) {
     });
 
 
-    grunt.registerTask("dev", ["connect", "watch"]);
+    grunt.registerTask("dev", ["connect", "jsdoc", "watch"]);
     grunt.registerTask("test", ["connect", "saucelabs-jasmine"]);
 };
