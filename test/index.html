@@ -51,15 +51,10 @@
 
         describe("Style Loader", function() {
             var styleLoader = Bigpipe.styleLoader;
-            it("loading/unloading callback called after styles applied", function(done) {
+            it("loading callback called after styles applied", function(done) {
                 var target = document.getElementById('style-manager-test1');
                 styleLoader.load('styles/style-manager-test1/height.css').then(function() {
                     expect(getComputedStyle(target).height).toBe('10px');
-                    done();
-                }).then(function() {
-                    return styleLoader.unload('styles/style-manager-test1/height.css');
-                }).then(function() {
-                    expect(getComputedStyle(target).height).toBe('0px');
                     done();
                 });
             });
@@ -90,16 +85,6 @@
                 }).then(function() {
                     expect(getComputedStyle(target).height).toBe('10px');
                     expect(document.styleSheets.length).toBe(originalStylesLength + 1);
-                }).then(function() {
-                    return styleLoader.unload('styles/style-manager-test3/height.css');
-                }).then(function() {
-                    expect(getComputedStyle(target).height).toBe('10px');
-                    expect(document.styleSheets.length).toBe(originalStylesLength + 1);
-                }).then(function() {
-                    return styleLoader.unload('styles/style-manager-test3/height.css');
-                }).then(function() {
-                    expect(getComputedStyle(target).height).toBe('0px');
-                    expect(document.styleSheets.length).toBe(originalStylesLength);
                     done();
                 });
             });
@@ -133,10 +118,6 @@
                 var target = document.getElementById('style-manager-test1');
                 styleLoader.load('style-manager-test1/height.css').then(function() {
                     expect(getComputedStyle(target).height).toBe('10px');
-                }).then(function() {
-                    return styleLoader.unload('style-manager-test1/height.css');
-                }).then(function() {
-                    expect(getComputedStyle(target).height).toBe('0px');
                     done();
                 });
             });
