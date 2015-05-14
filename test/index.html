@@ -194,6 +194,61 @@
             });
         });
     </script>
+    <script>
+        describe('ResourceManager', function (done) {
+            var resourceLoader = Bigpipe.scriptLoader;
+            var ResourceManager = Bigpipe.ResourceManager;
+
+            it('ResourceManager.combo', function (done) {
+                var testUrls = [];
+                for (var i = 1; i <= 8; i++) {
+                    testUrls.push('/a/b/c_' + i + '.js');
+                }
+                var expectUrls = [
+                    '/a/b/c_1.js,/a/b/c_2.js,/a/b/c_3.js',
+                    '/a/b/c_4.js,/a/b/c_5.js,/a/b/c_6.js',
+                    '/a/b/c_7.js,/a/b/c_8.js'
+                ];
+                expect(ResourceManager.combo([], 25)).toEqual([]);
+                expect(ResourceManager.combo(['/a/b/c.js'], 25)).toEqual(['/a/b/c.js']);
+                expect(ResourceManager.combo(testUrls, 3)).toEqual(expectUrls);
+                done();
+            });
+
+            it('resourceManager._registerResources', function (done) {
+
+                ResourceManager.config({
+                    COMBO_SIZE: 3
+                });
+                var resourceManager = new ResourceManager(resourceLoader);
+
+                resourceManager._registerResources(['/a/b/c_1.js', '/a/b/c_2.js', '/a/b/c_3.js']);
+                expect(ResourceManager.resourceComboMap).toEqual({
+                    '/a/b/c_1.js': '/a/b/c_1.js,/a/b/c_2.js,/a/b/c_3.js',
+                    '/a/b/c_2.js': '/a/b/c_1.js,/a/b/c_2.js,/a/b/c_3.js',
+                    '/a/b/c_3.js': '/a/b/c_1.js,/a/b/c_2.js,/a/b/c_3.js'
+                });
+                resourceManager._registerResources(['/a/b/c_2.js', '/a/b/c_3.js', '/a/b/c_4.js', '/a/b/c_5.js']);
+                expect(ResourceManager.resourceComboMap).toEqual({
+                    '/a/b/c_1.js': '/a/b/c_1.js,/a/b/c_2.js,/a/b/c_3.js',
+                    '/a/b/c_2.js': '/a/b/c_1.js,/a/b/c_2.js,/a/b/c_3.js',
+                    '/a/b/c_3.js': '/a/b/c_1.js,/a/b/c_2.js,/a/b/c_3.js',
+                    '/a/b/c_4.js': '/a/b/c_4.js,/a/b/c_5.js',
+                    '/a/b/c_5.js': '/a/b/c_4.js,/a/b/c_5.js'
+                });
+                done();
+            });
+
+            it('ResourceManager.config', function (done) {
+                ResourceManager.config({
+                    COMBO_SIZE: 33
+                });
+
+                expect(ResourceManager.COMBO_SIZE).toBe(33);
+                done();
+            });
+        });
+    </script>
     <div style="display:none;">
         <div id="pagelet_nav"></div>
         <code class="pagelet_html" id="pagelet_html_nav">
