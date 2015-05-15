@@ -29,11 +29,7 @@ module.exports = function(grunt) {
         browserName: 'safari',
         platform: 'OS X 10.10'
     }, {
-        browserName: 'iphone',
-        version: '7.1'
-    }, {
-        browserName: 'iphone',
-        version: '8.2'
+        browserName: 'opera'
     }];
 
     grunt.initConfig({
@@ -62,9 +58,10 @@ module.exports = function(grunt) {
                     tunnelTimeout: 5,
                     build: process.env.TRAVIS_JOB_ID,
                     concurrency: 3,
+                    statusCheckAttempts: 150,
                     browsers: browsers,
                     testname: 'bigpipe.js tests',
-                    tags: ['ci', 'master']
+                    tags: ['ci', process.env.TRAVIS_BRANCH]
                 }
             }
         },

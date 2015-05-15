@@ -76,10 +76,6 @@
                     Utils.unique([1, '1'])
                 }).toThrow();
             });
-            it("combo url", function() {
-                expect(Utils.combo([])).toEqual(['']);
-                expect(Utils.combo(['/tb/a.js', '/tb/b.js', '/tb/c.js'])).toEqual(['/tb/a.js,/tb/b.js,/tb/c.js']);
-            });
         });
 
         describe("Style Loader", function() {
@@ -213,7 +209,7 @@
             var resourceLoader = Bigpipe.scriptLoader;
             var ResourceManager = Bigpipe.ResourceManager;
 
-            it('ResourceManager.combo', function(done) {
+            it('combo', function(done) {
                 var testUrls = [];
                 for (var i = 1; i <= 8; i++) {
                     testUrls.push('/a/b/c_' + i + '.js');
@@ -229,7 +225,7 @@
                 done();
             });
 
-            it('resourceManager._registerResources', function(done) {
+            it('_registerResources', function(done) {
 
                 ResourceManager.config({
                     COMBO_SIZE: 3
@@ -253,7 +249,7 @@
                 done();
             });
 
-            it('ResourceManager.config', function(done) {
+            it('config', function(done) {
                 ResourceManager.config({
                     COMBO_SIZE: 33
                 });
