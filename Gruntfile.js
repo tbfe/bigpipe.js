@@ -4,49 +4,43 @@ module.exports = function(grunt) {
     require('load-grunt-tasks')(grunt);
 
     var browsers = [{
-        browserName: "chrome"
+        browserName: 'chrome'
     }, {
-        browserName: "chrome",
-        version: "beta"
+        browserName: 'chrome',
+        version: 'beta'
     }, {
-        browserName: "chrome",
-        version: "31"
+        browserName: 'chrome',
+        version: '31'
     }, {
-        browserName: "chrome",
-        version: "26"
+        browserName: 'chrome',
+        version: '26'
     }, {
-        browserName: "internet explorer",
-        version: "10"
+        browserName: 'internet explorer',
+        version: '10'
     }, {
-        browserName: "internet explorer",
-        version: "11"
+        browserName: 'internet explorer',
+        version: '11'
     }, {
-        browserName: "firefox"
+        browserName: 'firefox'
     }, {
-        browserName: "firefox",
-        version: "beta"
+        browserName: 'firefox',
+        version: 'beta'
     }, {
-        browserName: "safari",
-        platform: "OS X 10.10"
+        browserName: 'safari',
+        platform: 'OS X 10.10'
     }, {
-        browserName: "iphone",
-        version: "7.1"
+        browserName: 'iphone',
+        version: '7.1'
     }, {
-        browserName: "iphone",
-        version: "8.2"
-    }, {
-        browserName: "android",
-        version: "4.4"
-    }, {
-        browserName: "android",
-        version: "5.1"
+        browserName: 'iphone',
+        version: '8.2'
     }];
 
     grunt.initConfig({
         connect: {
             server: {
                 options: {
-                    base: "",
+                    base: '',
                     port: 9999,
                     middleware: function(connect, options, middlewares) {
                         // inject a custom middleware into the array of default middlewares
@@ -64,13 +58,13 @@ module.exports = function(grunt) {
         'saucelabs-jasmine': {
             all: {
                 options: {
-                    urls: ["http://127.0.0.1:9999/test/index.html"],
+                    urls: ['http://127.0.0.1:9999/test/index.html'],
                     tunnelTimeout: 5,
                     build: process.env.TRAVIS_JOB_ID,
                     concurrency: 3,
                     browsers: browsers,
-                    testname: "bigpipe.js tests",
-                    tags: ["ci", "master"]
+                    testname: 'bigpipe.js tests',
+                    tags: ['ci', 'master']
                 }
             }
         },
@@ -94,6 +88,6 @@ module.exports = function(grunt) {
     });
 
 
-    grunt.registerTask("dev", ["connect", "jsdoc", "watch"]);
-    grunt.registerTask("test", ["connect", "saucelabs-jasmine"]);
+    grunt.registerTask('dev', ['connect', 'jsdoc', 'watch']);
+    grunt.registerTask('test', ['connect', 'saucelabs-jasmine']);
 };
