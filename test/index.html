@@ -3,12 +3,45 @@
 <head>
     <title>Bigpipe.js Test</title>
     <link rel="stylesheet" href="../bower_components/jasmine/lib/jasmine-core/jasmine.css">
+    <script src="../bower_components/zepto/zepto.min.js"></script>
     <script src="../bower_components/jasmine/lib/jasmine-core/jasmine.js"></script>
     <script src="../bower_components/jasmine/lib/jasmine-core/jasmine-html.js"></script>
     <script src="../bower_components/jasmine/lib/jasmine-core/boot.js"></script>
     <script src="../bower_components/jasmine-jsreporter-real/jasmine-jsreporter.js"></script>
     <script>
         jasmine.getEnv().addReporter(new jasmine.JSReporter2());
+        // hack
+        // https://github.com/axemclion/grunt-saucelabs/issues/109#issuecomment-64239913
+        (function() {
+            var oldFunc = window.jasmine.getJSReport;
+            window.jasmine.getJSReport = function() {
+                var results = oldFunc();
+                if (results) {
+                    return {
+                        durationSec: results.durationSec,
+                        suites: removePassingTests(results.suites),
+                        passed: results.passed
+                    };
+                } else {
+                    return null;
+                }
+            };
+
+            function removePassingTests(suites) {
+                return $.map($.grep(suites, grepFailed), mapSuite);
+            }
+
+            function mapSuite(suite) {
+                return $.extend({}, suite, {
+                    specs: $.grep(suite.specs, grepFailed),
+                    suites: removePassingTests(suite.suites)
+                });
+            }
+
+            function grepFailed(item) {
+                return !item.passed;
+            }
+        })();
     </script>
     <script src="../bower_components/es6-promise/promise.js"></script>
     <script>
@@ -39,7 +72,7 @@
                 var result = Utils.unique(['2', '1', '1', '2']);
                 expect(result.length).toEqual(2);
                 expect(result).toEqual(jasmine.arrayContaining(['1', '2']));
-                expect(function(){
+                expect(function() {
                     Utils.unique([1, '1'])
                 }).toThrow();
             });
@@ -176,11 +209,11 @@
         });
     </script>
     <script>
-        describe('ResourceManager', function (done) {
+        describe('ResourceManager', function(done) {
             var resourceLoader = Bigpipe.scriptLoader;
             var ResourceManager = Bigpipe.ResourceManager;
 
-            it('ResourceManager.combo', function (done) {
+            it('ResourceManager.combo', function(done) {
                 var testUrls = [];
                 for (var i = 1; i <= 8; i++) {
                     testUrls.push('/a/b/c_' + i + '.js');
@@ -196,7 +229,7 @@
                 done();
             });
 
-            it('resourceManager._registerResources', function (done) {
+            it('resourceManager._registerResources', function(done) {
 
                 ResourceManager.config({
                     COMBO_SIZE: 3
@@ -220,7 +253,7 @@
                 done();
             });
 
-            it('ResourceManager.config', function (done) {
+            it('ResourceManager.config', function(done) {
                 ResourceManager.config({
                     COMBO_SIZE: 33
                 });
@@ -278,7 +311,7 @@
     <script>
         describe("Bigpipe", function() {
             describe("register", function() {
-                beforeEach(function () {
+                beforeEach(function() {
                     Bigpipe.config({
                         getStylesUrl: function(ids) {
                             var urls = [];
@@ -368,7 +401,7 @@
                 });
                 it("Register pagelets with common static resources", function(done) {
                     Bigpipe.register('combo_test_foo', {
-                        styles: ['combo-test/a.css','combo-test/b.css','combo-test/c.css'],
+                        styles: ['combo-test/a.css', 'combo-test/b.css', 'combo-test/c.css'],
                         scripts: ['combo-test/a.js', 'combo-test/b.js']
                     }).then(function(pagelet) {
                         var element = document.getElementById('foo');
@@ -378,7 +411,7 @@
                     });
 
                     Bigpipe.register('combo_test_bar', {
-                        styles: ['combo-test/b.css','combo-test/d.css'],
+                        styles: ['combo-test/b.css', 'combo-test/d.css'],
                         scripts: ['combo-test/a.js', 'combo-test/e.js']
                     }).then(function(pagelet) {
                         var element = document.getElementById('bar');

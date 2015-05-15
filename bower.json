@@ -15,8 +15,9 @@
     "tests"
   ],
   "devDependencies": {
-    "jasmine": "~2.2.1",
-    "jasmine-jsreporter-real": "*"
+    "jasmine": "~2.3",
+    "jasmine-jsreporter-real": "*",
+    "zepto": "~1.1"
   },
   "dependencies": {
     "es6-promise": "~2"
