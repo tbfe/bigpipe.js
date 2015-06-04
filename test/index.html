@@ -416,7 +416,47 @@
                     });
                 });
             });
-            describe("event", function() {
+            describe('bigpipe event', function () {
+                var bigpipeCallback1;
+                var bigpipeCallback2;
+                var eventName1 = 'event1';
+                var eventName2 = 'event2';
+                var data = 'data';
+                beforeEach(function () {
+                    bigpipeCallback1 = jasmine.createSpy('bigpipeCallback1');
+                    bigpipeCallback2 = jasmine.createSpy('bigpipeCallback2');
+                    // 清空事件
+                    Bigpipe.debug(true);
+                    delete Bigpipe._eventHandlers[eventName1];
+                    delete Bigpipe._eventHandlers[eventName2];
+                });
+                it('addEventListener', function (done) {
+
+                    Bigpipe.addEventListener(eventName1, bigpipeCallback1);
+                    expect(Bigpipe._eventHandlers[eventName1][0]).toEqual(bigpipeCallback1);
+                    Bigpipe.addEventListener(eventName2, bigpipeCallback2);
+                    expect(Bigpipe._eventHandlers[eventName1][0]).toEqual(bigpipeCallback1);
+                    expect(Bigpipe._eventHandlers[eventName2][0]).toEqual(bigpipeCallback2);
+                    done();
+                });
+                it('removeEventListener', function (done) {
+                    Bigpipe.addEventListener(eventName1, bigpipeCallback1);
+                    Bigpipe.addEventListener(eventName2, bigpipeCallback2);
+                    Bigpipe.removeEventListener(eventName1);
+                    expect(Bigpipe._eventHandlers[eventName1]).toBe(undefined);
+                    expect(Bigpipe._eventHandlers[eventName2][0]).toEqual(bigpipeCallback2);
+                    done();
+                });
+                it('dispatchEvent', function (done) {
+                    Bigpipe.addEventListener(eventName1, bigpipeCallback1);
+                    Bigpipe.addEventListener(eventName2, bigpipeCallback2);
+                    Bigpipe.dispatchEvent(eventName1, data);
+                    expect(bigpipeCallback1).toHaveBeenCalled();
+                    expect(bigpipeCallback1).toHaveBeenCalledWith(data);
+                    done();
+                });
+            });
+            describe("pagelet event", function() {
                 var targetPagelet, parentPagelet, childPagelet, siblingPagelet,
                     targetCallback, parentCallback, childCallback, siblingCallback;
                 var loadAllPagelets = Promise.all([
