@@ -543,6 +543,37 @@
                     expect(siblingCallbackNamespaceA).not.toHaveBeenCalled();
                     expect(childCallbackNamespaceA).not.toHaveBeenCalled();
                 });
+                it('off', function() {
+                    var eventName = 'emitedEvent';
+                    var eventNameWithNamespace = 'emitedEvent.A';
+                    var data = 'emitedEventData';
+                    initCallbacks();
+
+                    registerCallbacks(eventName);
+                    registerCallbacksWithNamespaceA(eventNameWithNamespace);
+
+                    // remove all handlers of an event
+                    targetPagelet.off(eventNameWithNamespace);
+
+                    targetPagelet.emit(eventNameWithNamespace, data);
+                    targetPagelet.emit(eventName, data);
+
+                    expect(targetCallbackNamespaceA).not.toHaveBeenCalled();
+                    expect(targetCallback).toHaveBeenCalledWith(data);
+
+                    var callback1 = jasmine.createSpy('callback1');
+                    var callback2 = jasmine.createSpy('callback2');
+                    targetPagelet.on(eventName, callback1);
+                    targetPagelet.on(eventName, callback2);
+
+                    // remove sepecify handler of an event
+                    targetPagelet.off(eventName, callback1);
+
+                    targetPagelet.emit(eventName, data);
+
+                    expect(callback1).not.toHaveBeenCalled();
+                    expect(callback2).toHaveBeenCalledWith(data);
+                });
                 it('broadcast', function() {
                     var eventName = 'broadcastedEvent';
                     var data = 'broadcastedEventData';
