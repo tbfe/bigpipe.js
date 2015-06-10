@@ -432,26 +432,29 @@
                 });
                 it('addEventListener', function (done) {
                     Bigpipe.addEventListener(eventName1, bigpipeCallback1);
-                    expect(Bigpipe._eventHandlers[eventName1][0]).toEqual(bigpipeCallback1);
-                    Bigpipe.addEventListener(eventName2, bigpipeCallback2);
-                    expect(Bigpipe._eventHandlers[eventName1][0]).toEqual(bigpipeCallback1);
-                    expect(Bigpipe._eventHandlers[eventName2][0]).toEqual(bigpipeCallback2);
+                    expect(Bigpipe._eventHandlers[eventName1]['__default'][0]).toEqual(bigpipeCallback1);
+                    Bigpipe.addEventListener('eventName.A', bigpipeCallback2);
+                    expect(Bigpipe._eventHandlers[eventName1]['__default'][0]).toEqual(bigpipeCallback1);
+                    expect(Bigpipe._eventHandlers['eventName']['A'][0]).toEqual(bigpipeCallback2);
                     done();
                 });
                 it('removeEventListener', function (done) {
                     Bigpipe.addEventListener(eventName1, bigpipeCallback1);
-                    Bigpipe.addEventListener(eventName2, bigpipeCallback2);
+                    Bigpipe.addEventListener('eventName.A', bigpipeCallback2);
                     Bigpipe.removeEventListener(eventName1);
-                    expect(Bigpipe._eventHandlers[eventName1]).toBe(undefined);
-                    expect(Bigpipe._eventHandlers[eventName2][0]).toEqual(bigpipeCallback2);
+                    expect(Bigpipe._eventHandlers[eventName1]['__default']).toBe(undefined);
+                    expect(Bigpipe._eventHandlers['eventName']['A']).toEqual(bigpipeCallback2);
                     done();
                 });
                 it('dispatchEvent', function (done) {
                     Bigpipe.addEventListener(eventName1, bigpipeCallback1);
-                    Bigpipe.addEventListener(eventName2, bigpipeCallback2);
+                    Bigpipe.addEventListener('eventName.A', bigpipeCallback2);
                     Bigpipe.dispatchEvent(eventName1, data);
+                    Bigpipe.dispatchEvent('eventName.A', data);
                     expect(bigpipeCallback1).toHaveBeenCalled();
                     expect(bigpipeCallback1).toHaveBeenCalledWith(data);
+                    expect(bigpipeCallback2).toHaveBeenCalled();
+                    expect(bigpipeCallback2).toHaveBeenCalledWith(data);
                     done();
                 });
             });
