@@ -20,6 +20,7 @@
     "zepto": "~1.1"
   },
   "dependencies": {
-    "es6-promise": "~2"
+    "es6-promise": "~2",
+    "uri.js": "~1.15"
   }
 }

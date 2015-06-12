@@ -4,6 +4,7 @@
     <title>Bigpipe.js Test</title>
     <link rel="stylesheet" href="../bower_components/jasmine/lib/jasmine-core/jasmine.css">
     <script src="../bower_components/zepto/zepto.min.js"></script>
+    <script src="../bower_components/uri.js/src/URI.min.js"></script>
     <script src="../bower_components/jasmine/lib/jasmine-core/jasmine.js"></script>
     <script src="../bower_components/jasmine/lib/jasmine-core/jasmine-html.js"></script>
     <script src="../bower_components/jasmine/lib/jasmine-core/boot.js"></script>
@@ -427,38 +428,41 @@
                     bigpipeCallback2 = jasmine.createSpy('bigpipeCallback2');
                     // 清空事件
                     Bigpipe.debug(true);
-                    delete Bigpipe._eventHandlers[eventName1];
-                    delete Bigpipe._eventHandlers[eventName2];
+                    Bigpipe._bigpipeEventManager._eventPool = {};
                 });
                 it('addEventListener', function (done) {
-
                     Bigpipe.addEventListener(eventName1, bigpipeCallback1);
-                    expect(Bigpipe._eventHandlers[eventName1][0]).toEqual(bigpipeCallback1);
-                    Bigpipe.addEventListener(eventName2, bigpipeCallback2);
-                    expect(Bigpipe._eventHandlers[eventName1][0]).toEqual(bigpipeCallback1);
-                    expect(Bigpipe._eventHandlers[eventName2][0]).toEqual(bigpipeCallback2);
+                    expect(Bigpipe._bigpipeEventManager._eventPool[eventName1]['__default'][0]).toEqual(bigpipeCallback1);
+                    Bigpipe.addEventListener('eventName.A', bigpipeCallback2);
+                    expect(Bigpipe._bigpipeEventManager._eventPool[eventName1]['__default'][0]).toEqual(bigpipeCallback1);
+                    expect(Bigpipe._bigpipeEventManager._eventPool['eventName']['A'][0]).toEqual(bigpipeCallback2);
                     done();
                 });
                 it('removeEventListener', function (done) {
                     Bigpipe.addEventListener(eventName1, bigpipeCallback1);
-                    Bigpipe.addEventListener(eventName2, bigpipeCallback2);
+                    Bigpipe.addEventListener('eventName.A', bigpipeCallback2);
                     Bigpipe.removeEventListener(eventName1);
-                    expect(Bigpipe._eventHandlers[eventName1]).toBe(undefined);
-                    expect(Bigpipe._eventHandlers[eventName2][0]).toEqual(bigpipeCallback2);
+                    expect(Bigpipe._bigpipeEventManager._eventPool[eventName1]['__default']).toBe(undefined);
+                    expect(Bigpipe._bigpipeEventManager._eventPool['eventName']['A'][0]).toEqual(bigpipeCallback2);
                     done();
                 });
                 it('dispatchEvent', function (done) {
                     Bigpipe.addEventListener(eventName1, bigpipeCallback1);
-                    Bigpipe.addEventListener(eventName2, bigpipeCallback2);
+                    Bigpipe.addEventListener('eventName.A', bigpipeCallback2);
                     Bigpipe.dispatchEvent(eventName1, data);
+                    Bigpipe.dispatchEvent('eventName.A', data);
                     expect(bigpipeCallback1).toHaveBeenCalled();
                     expect(bigpipeCallback1).toHaveBeenCalledWith(data);
+                    expect(bigpipeCallback2).toHaveBeenCalled();
+                    expect(bigpipeCallback2).toHaveBeenCalledWith(data);
                     done();
                 });
             });
             describe("pagelet event", function() {
                 var targetPagelet, parentPagelet, childPagelet, siblingPagelet,
                     targetCallback, parentCallback, childCallback, siblingCallback;
+                var targetCallbackNamespaceA, parentCallbackNamespaceA, childCallbackNamespaceA, siblingCallbackNamespaceA;
+                var targetCallbackNamespaceB, parentCallbackNamespaceB, childCallbackNamespaceB, siblingCallbackNamespaceB;
                 var loadAllPagelets = Promise.all([
                     Bigpipe.register('event_parent').then(function(pagelet) {
                         parentPagelet = pagelet;
@@ -483,20 +487,39 @@
                     loadAllPagelets.then(done);
                 });
 
-                function registerCallbacks(eventName) {
+                function initCallbacks () {
                     targetCallback = jasmine.createSpy('targetCallback');
                     parentCallback = jasmine.createSpy('parentCallback');
                     childCallback = jasmine.createSpy('childCallback');
                     siblingCallback = jasmine.createSpy('siblingCallback');
+
+                    targetCallbackNamespaceA = jasmine.createSpy('targetCallbackNamespaceA');
+                    parentCallbackNamespaceA = jasmine.createSpy('parentCallbackNamespaceA');
+                    childCallbackNamespaceA = jasmine.createSpy('childCallbackNamespaceA');
+                    siblingCallbackNamespaceA = jasmine.createSpy('siblingCallbackNamespaceA');
+
+                    targetCallbackNamespaceB = jasmine.createSpy('targetCallbackNamespaceB');
+                    parentCallbackNamespaceB = jasmine.createSpy('parentCallbackNamespaceB');
+                    childCallbackNamespaceB = jasmine.createSpy('childCallbackNamespaceB');
+                    siblingCallbackNamespaceB = jasmine.createSpy('siblingCallbackNamespaceB');
+                }
+
+                function registerCallbacks(eventName) {
                     targetPagelet.on(eventName, targetCallback);
                     parentPagelet.on(eventName, parentCallback);
                     childPagelet.on(eventName, childCallback);
                     siblingPagelet.on(eventName, siblingCallback);
                 }
-
+                function registerCallbacksWithNamespaceA (eventName) {
+                    targetPagelet.on(eventName, targetCallbackNamespaceA);
+                    parentPagelet.on(eventName, parentCallbackNamespaceA);
+                    childPagelet.on(eventName, childCallbackNamespaceA);
+                    siblingPagelet.on(eventName, siblingCallbackNamespaceA);
+                }
                 it('emit', function() {
                     var eventName = 'emitedEvent';
                     var data = 'emitedEventData';
+                    initCallbacks();
                     registerCallbacks(eventName);
                     targetPagelet.emit(eventName, data);
                     expect(targetCallback).toHaveBeenCalledWith(data);
@@ -504,9 +527,60 @@
                     expect(siblingCallback).not.toHaveBeenCalled();
                     expect(childCallback).not.toHaveBeenCalled();
                 });
+                it('event namespace', function() {
+                    var eventName = 'emitedEvent';
+                    var eventNameWithNamespace = 'emitedEvent.A';
+                    var data = 'emitedEventData';
+                    initCallbacks();
+
+                    registerCallbacks(eventName);
+                    registerCallbacksWithNamespaceA(eventNameWithNamespace);
+                    targetPagelet.emit(eventNameWithNamespace, data);
+
+                    expect(targetCallback).not.toHaveBeenCalled();
+                    expect(parentCallback).not.toHaveBeenCalled();
+                    expect(siblingCallback).not.toHaveBeenCalled();
+                    expect(childCallback).not.toHaveBeenCalled();
+                    expect(targetCallbackNamespaceA).toHaveBeenCalledWith(data);
+                    expect(parentCallbackNamespaceA).toHaveBeenCalledWith(data);
+                    expect(siblingCallbackNamespaceA).not.toHaveBeenCalled();
+                    expect(childCallbackNamespaceA).not.toHaveBeenCalled();
+                });
+                it('off', function() {
+                    var eventName = 'emitedEvent';
+                    var eventNameWithNamespace = 'emitedEvent.A';
+                    var data = 'emitedEventData';
+                    initCallbacks();
+
+                    registerCallbacks(eventName);
+                    registerCallbacksWithNamespaceA(eventNameWithNamespace);
+
+                    // remove all handlers of an event
+                    targetPagelet.off(eventNameWithNamespace);
+
+                    targetPagelet.emit(eventNameWithNamespace, data);
+                    targetPagelet.emit(eventName, data);
+
+                    expect(targetCallbackNamespaceA).not.toHaveBeenCalled();
+                    expect(targetCallback).toHaveBeenCalledWith(data);
+
+                    var callback1 = jasmine.createSpy('callback1');
+                    var callback2 = jasmine.createSpy('callback2');
+                    targetPagelet.on(eventName, callback1);
+                    targetPagelet.on(eventName, callback2);
+
+                    // remove sepecify handler of an event
+                    targetPagelet.off(eventName, callback1);
+
+                    targetPagelet.emit(eventName, data);
+
+                    expect(callback1).not.toHaveBeenCalled();
+                    expect(callback2).toHaveBeenCalledWith(data);
+                });
                 it('broadcast', function() {
                     var eventName = 'broadcastedEvent';
                     var data = 'broadcastedEventData';
+                    initCallbacks();
                     registerCallbacks(eventName);
                     targetPagelet.broadcast(eventName, data);
                     expect(targetCallback).toHaveBeenCalledWith(data);
@@ -517,6 +591,7 @@
                 it('global broadcast', function() {
                     var eventName = 'global broadcastedEvent';
                     var data = 'global broadcastedEventData';
+                    initCallbacks();
                     registerCallbacks(eventName);
                     Bigpipe.broadcast(eventName, data);
                     expect(targetCallback).toHaveBeenCalledWith(data);
