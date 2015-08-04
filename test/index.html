@@ -605,6 +605,11 @@
                 });
             });
             describe("Partial load", function() {
+                beforeEach(function() {
+                    Bigpipe.config({
+                        ignoreTimeStamp: true
+                    });
+                });
                 it('refresh pagelet', function(done) {
                     var firstCallback = jasmine.createSpy('firstCallback');
                     var destroyCallback = jasmine.createSpy('destroyCallback');
